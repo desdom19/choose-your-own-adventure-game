@@ -161,6 +161,94 @@ public class MessagesTests
         }
     }
 
+    // --- Italian ---
+
+    private static Messages CreateItalianMessages()
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage("Italian");
+        messages.ReadDictionary();
+        return messages;
+    }
+
+    [TestMethod]
+    public void ReadDictionary_LoadsItalianWelcomeMessage()
+    {
+        Assert.AreEqual("Benvenuto in Scegli la Tua Avventura", CreateItalianMessages().GetMessage("welcome"));
+    }
+
+    [TestMethod]
+    [DataRow("umano", "Human", "Umano")]
+    [DataRow("ELFO", "Elf", "Elfo")]
+    [DataRow("nano", "Dwarf", "Nano")]
+    [DataRow("mezzuomo", "Halfling", "Mezzuomo")]
+    public void Italian_RaceInput_NormalizesAndDisplays(string input, string canonical, string display)
+    {
+        Messages messages = CreateItalianMessages();
+        Assert.IsTrue(messages.IsValidRace(input));
+        Assert.AreEqual(canonical, messages.NormalizeRace(input));
+        Assert.AreEqual(display, messages.TranslateRaceForDisplay(canonical));
+    }
+
+    [TestMethod]
+    [DataRow("guerriero", "Fighter", "Guerriero")]
+    [DataRow("MAGO", "Magician", "Mago")]
+    [DataRow("ladro", "Thief", "Ladro")]
+    [DataRow("arciere", "Archer", "Arciere")]
+    public void Italian_OccupationInput_NormalizesAndDisplays(string input, string canonical, string display)
+    {
+        Messages messages = CreateItalianMessages();
+        Assert.IsTrue(messages.IsValidOccupation(input));
+        Assert.AreEqual(canonical, messages.NormalizeOccupation(input));
+        Assert.AreEqual(display, messages.TranslateOccupationForDisplay(canonical));
+    }
+
+    [TestMethod]
+    [DataRow("long sword", "spada lunga")]
+    [DataRow("lightning bolt spell", "incantesimo del fulmine")]
+    [DataRow("dagger", "pugnale")]
+    [DataRow("long bow", "arco lungo")]
+    [DataRow("claws", "artigli")]
+    public void Italian_Weapons_AreTranslated(string weapon, string display)
+    {
+        Assert.AreEqual(display, CreateItalianMessages().TranslateWeaponForDisplay(weapon));
+    }
+
+    // Italian text must have the same keys as English and the same {0}-style
+    // placeholders, because the game passes each message to string.Format.
+    [TestMethod]
+    public void Italian_Dictionary_MatchesEnglishKeysAndPlaceholders()
+    {
+        string jsonPath = Path.Combine(AppContext.BaseDirectory, "language_data.json");
+        using System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(jsonPath));
+
+        Dictionary<string, string> english = ReadSection(doc, "English");
+        Dictionary<string, string> italian = ReadSection(doc, "Italian");
+
+        CollectionAssert.AreEquivalent(english.Keys.ToList(), italian.Keys.ToList());
+
+        foreach (KeyValuePair<string, string> entry in english)
+        {
+            CollectionAssert.AreEquivalent(
+                Placeholders(entry.Value),
+                Placeholders(italian[entry.Key]),
+                $"Placeholders differ for key '{entry.Key}'.");
+        }
+    }
+
+    private static Dictionary<string, string> ReadSection(System.Text.Json.JsonDocument doc, string language)
+    {
+        return doc.RootElement.GetProperty(language).GetProperty("dictionary").EnumerateObject()
+            .ToDictionary(entry => entry.Name, entry => entry.Value.GetString() ?? string.Empty);
+    }
+
+    private static List<string> Placeholders(string text)
+    {
+        return System.Text.RegularExpressions.Regex.Matches(text, @"\{\d+\}")
+            .Select(match => match.Value)
+            .ToList();
+    }
+
     // --- IsValidRace ---
 
     [TestMethod]
