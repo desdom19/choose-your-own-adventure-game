@@ -231,6 +231,23 @@ public class MessagesTests
         Assert.AreEqual(cloak, messages.TranslateArmorForDisplay("elven cloak"));
     }
 
+    [TestMethod]
+    [DataRow("English", "flaming sword", "chain lightning spell", "venom dagger", "elven bow")]
+    [DataRow("Spanish", "espada llameante", "hechizo de rayo en cadena", "daga venenosa", "arco elfico")]
+    [DataRow("French", "epee flamboyante", "sort d'eclair en chaine", "dague venimeuse", "arc elfique")]
+    [DataRow("Italian", "spada fiammeggiante", "incantesimo del fulmine a catena", "pugnale velenoso", "arco elfico")]
+    public void MagicalWeaponNames_AreTranslated(string language, string sword, string spell, string dagger, string bow)
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage(language);
+        messages.ReadDictionary();
+
+        Assert.AreEqual(sword, messages.TranslateWeaponForDisplay("flaming sword"));
+        Assert.AreEqual(spell, messages.TranslateWeaponForDisplay("chain lightning spell"));
+        Assert.AreEqual(dagger, messages.TranslateWeaponForDisplay("venom dagger"));
+        Assert.AreEqual(bow, messages.TranslateWeaponForDisplay("elven bow"));
+    }
+
     // Every language must have the same keys as English and the same {0}-style
     // placeholders, because the game passes each message to string.Format.
     [TestMethod]
