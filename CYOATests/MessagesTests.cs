@@ -214,25 +214,29 @@ public class MessagesTests
         Assert.AreEqual(display, CreateItalianMessages().TranslateWeaponForDisplay(weapon));
     }
 
-    // Italian text must have the same keys as English and the same {0}-style
+    // Every language must have the same keys as English and the same {0}-style
     // placeholders, because the game passes each message to string.Format.
     [TestMethod]
-    public void Italian_Dictionary_MatchesEnglishKeysAndPlaceholders()
+    [DataRow("Spanish")]
+    [DataRow("French")]
+    [DataRow("Italian")]
+    public void Dictionary_MatchesEnglishKeysAndPlaceholders(string language)
     {
         string jsonPath = Path.Combine(AppContext.BaseDirectory, "language_data.json");
         using System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(jsonPath));
 
         Dictionary<string, string> english = ReadSection(doc, "English");
-        Dictionary<string, string> italian = ReadSection(doc, "Italian");
+        Dictionary<string, string> translated = ReadSection(doc, language);
 
-        CollectionAssert.AreEquivalent(english.Keys.ToList(), italian.Keys.ToList());
+        CollectionAssert.AreEquivalent(english.Keys.ToList(), translated.Keys.ToList(),
+            $"{language} keys differ from English.");
 
         foreach (KeyValuePair<string, string> entry in english)
         {
             CollectionAssert.AreEquivalent(
                 Placeholders(entry.Value),
-                Placeholders(italian[entry.Key]),
-                $"Placeholders differ for key '{entry.Key}'.");
+                Placeholders(translated[entry.Key]),
+                $"{language} placeholders differ for key '{entry.Key}'.");
         }
     }
 
