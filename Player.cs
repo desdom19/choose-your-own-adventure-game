@@ -1,6 +1,11 @@
 public class Player
 {
-    private readonly Die _die = new Die();
+    private readonly Die _die;
+
+    public Player(Die? die = null)
+    {
+        _die = die ?? new Die();
+    }
 
     public string Name { get; set; } = "";
     public string Race { get; set; } = "";
@@ -71,21 +76,10 @@ public class Player
 
     private void AssignWeaponByOccupation()
     {
-        switch (Occupation.ToLower())
-        {
-            case "fighter":
-                Weapon = new Weapon("long sword", 12, "-)=====>");
-                break;
-            case "magician":
-                Weapon = new Weapon("lightning bolt spell", 12, "zap~~~~~~");
-                break;
-            case "thief":
-                Weapon = new Weapon("dagger", 6, "-)==>");
-                break;
-            case "archer":
-                Weapon = new Weapon("long bow", 8, "}    -->");
-                break;
-        }
+        OccupationEquipment? equipment = OccupationEquipment.For(Occupation);
+
+        if (equipment != null)
+            Weapon = equipment.CreateStartingWeapon();
     }
 
     private int RollStrength(Messages messages)
