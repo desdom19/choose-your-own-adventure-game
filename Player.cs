@@ -25,6 +25,9 @@ public class Player
     // Empty until the player buys Armor from the Merchant.
     public Armor? Armor { get; set; }
 
+    // Damage absorbed from each dragon hit that lands. 0 without Armor.
+    public int Protection => Armor?.Protection ?? 0;
+
     public void CreateCharacter(Messages messages)
     {
         Race = PromptForRace(messages);

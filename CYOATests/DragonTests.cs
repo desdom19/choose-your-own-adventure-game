@@ -14,6 +14,24 @@ public class DragonTests
         return messages;
     }
 
+    // The dragon rolls Strength 20, Agility 1 and Health 20 when created, then its attack
+    // roll hits (1), the player's dodge roll fails (20) and the damage roll is as given.
+    private static Dragon CreateDragonThatHitsFor(int damageRoll)
+    {
+        return new Dragon(new ScriptedDie(20, 1, 20, 1, 20, damageRoll));
+    }
+
+    private static Player CreateTargetPlayer(Armor? armor, int healthPoints = 30)
+    {
+        return new Player
+        {
+            Name = "TestHero",
+            Agility = 10,
+            HealthPoints = healthPoints,
+            Armor = armor
+        };
+    }
+
     [TestMethod]
     public void NewDragon_InitializesRequiredProperties()
     {
@@ -125,6 +143,109 @@ public class DragonTests
         string result = dragon.Attack(player, GetMessages());
 
         Assert.IsTrue(player.HealthPoints >= 0);
+    }
+
+    [TestMethod]
+    public void Attack_WithArmor_ReducesDamageByProtection()
+    {
+        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
+
+        string result = CreateDragonThatHitsFor(5).Attack(player, GetMessages());
+
+        Assert.AreEqual(28, player.HealthPoints);
+        StringAssert.Contains(result, "Armor (shadow leathers): 3 damage absorbed, 2 damage taken.");
+        StringAssert.Contains(result, "TestHero's health points are now 28.");
+    }
+
+    [TestMethod]
+    public void Attack_WithArmor_DamageEqualToProtection_AbsorbsTheWholeHit()
+    {
+        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
+
+        string result = CreateDragonThatHitsFor(3).Attack(player, GetMessages());
+
+        Assert.AreEqual(30, player.HealthPoints);
+        StringAssert.Contains(result, "Armor (shadow leathers): the whole hit is absorbed, no damage taken!");
+        Assert.IsFalse(result.Contains("damage absorbed,"), "Only the whole-hit line should appear.");
+    }
+
+    [TestMethod]
+    public void Attack_WithArmor_DamageBelowProtection_NeverHeals()
+    {
+        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
+
+        string result = CreateDragonThatHitsFor(2).Attack(player, GetMessages());
+
+        Assert.AreEqual(30, player.HealthPoints);
+        StringAssert.Contains(result, "Armor (shadow leathers): the whole hit is absorbed, no damage taken!");
+    }
+
+    [TestMethod]
+    public void Attack_WithArmor_PlayerReachingZeroHealthIsDefeated()
+    {
+        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3), healthPoints: 2);
+
+        string result = CreateDragonThatHitsFor(5).Attack(player, GetMessages());
+
+        Assert.AreEqual(0, player.HealthPoints);
+        StringAssert.Contains(result, "TestHero has been defeated.");
+    }
+
+    [TestMethod]
+    public void Attack_WithoutArmor_DamageAndOutputAreUnchanged()
+    {
+        Player player = CreateTargetPlayer(armor: null);
+
+        string result = CreateDragonThatHitsFor(5).Attack(player, GetMessages());
+
+        Assert.AreEqual(25, player.HealthPoints);
+        string expected = string.Join(Environment.NewLine,
+            "Smolderfang attacks TestHero with claws!",
+            "<<< claws >>>",
+            "Smolderfang hits TestHero.",
+            "Smolderfang deals 5 damage.",
+            "TestHero's health points are now 25.");
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestMethod]
+    public void Attack_WithArmor_SuccessfulDodgeStillDependsOnlyOnAgility()
+    {
+        // Attack roll hits (1), then the dodge roll of 10 equals the player's Agility of 10.
+        Dragon dragon = new Dragon(new ScriptedDie(20, 1, 20, 1, 10));
+        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
+
+        string result = dragon.Attack(player, GetMessages());
+
+        Assert.AreEqual(30, player.HealthPoints);
+        StringAssert.Contains(result, "TestHero successfully defends the attack.");
+        Assert.IsFalse(result.Contains("Armor ("), "Armor plays no part in a dodged attack.");
+    }
+
+    [TestMethod]
+    [DataRow("Spanish", "Armadura (cueros de las sombras): el golpe entero es absorbido, ningun dano recibido!")]
+    [DataRow("French", "Armure (cuirs des ombres): le coup entier est absorbe, aucun degat subi!")]
+    [DataRow("Italian", "Armatura (cuoio delle ombre): il colpo intero viene assorbito, nessun danno subito!")]
+    public void Attack_WithArmor_WholeHitMessageIsTranslated(string language, string expected)
+    {
+        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
+
+        string result = CreateDragonThatHitsFor(3).Attack(player, GetMessages(language));
+
+        StringAssert.Contains(result, expected);
+    }
+
+    [TestMethod]
+    [DataRow("Spanish", "Armadura (cueros de las sombras): 3 de dano absorbido, 2 de dano recibido.")]
+    [DataRow("French", "Armure (cuirs des ombres): 3 degats absorbes, 2 degats subis.")]
+    [DataRow("Italian", "Armatura (cuoio delle ombre): 3 danni assorbiti, 2 danni subiti.")]
+    public void Attack_WithArmor_AbsorbedMessageIsTranslated(string language, string expected)
+    {
+        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
+
+        string result = CreateDragonThatHitsFor(5).Attack(player, GetMessages(language));
+
+        StringAssert.Contains(result, expected);
     }
 }
 

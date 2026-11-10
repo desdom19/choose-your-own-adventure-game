@@ -1,10 +1,10 @@
 [TestClass]
 public class CombatTests
 {
-    private Messages CreateEnglishMessages()
+    private Messages CreateMessages(string language = "English")
     {
         Messages messages = new Messages();
-        messages.SetCurrentLanguage("English");
+        messages.SetCurrentLanguage(language);
         messages.ReadDictionary();
         return messages;
     }
@@ -42,7 +42,7 @@ public class CombatTests
     {
         Player player = new Player();
         Dragon dragon = new Dragon(new Die());
-        Messages messages = CreateEnglishMessages();
+        Messages messages = CreateMessages();
 
         Combat combat = new Combat(player, dragon, messages);
 
@@ -55,7 +55,7 @@ public class CombatTests
     {
         Player player = new Player();
         Dragon dragon = new Dragon(new Die());
-        Messages messages = CreateEnglishMessages();
+        Messages messages = CreateMessages();
 
         Combat combat = new Combat(player, dragon, messages);
 
@@ -67,7 +67,7 @@ public class CombatTests
     {
         Player player = CreateTestPlayer();
         Dragon dragon = CreateTestDragon();
-        Messages messages = CreateEnglishMessages();
+        Messages messages = CreateMessages();
 
         Combat combat = new Combat(player, dragon, messages);
 
@@ -81,7 +81,7 @@ public class CombatTests
     {
         Player player = CreateTestPlayer();
         Dragon dragon = CreateTestDragon();
-        Messages messages = CreateEnglishMessages();
+        Messages messages = CreateMessages();
 
         Combat combat = new Combat(player, dragon, messages);
 
@@ -97,7 +97,7 @@ public class CombatTests
     {
         Player player = CreateTestPlayer();
         Dragon dragon = CreateTestDragon();
-        Messages messages = CreateEnglishMessages();
+        Messages messages = CreateMessages();
 
         Combat combat = new Combat(player, dragon, messages);
 
@@ -116,7 +116,7 @@ public class CombatTests
     {
         Player player = CreateTestPlayer();
         Dragon dragon = CreateTestDragon();
-        Messages messages = CreateEnglishMessages();
+        Messages messages = CreateMessages();
 
         Combat combat = new Combat(player, dragon, messages);
 
@@ -131,11 +131,44 @@ public class CombatTests
     }
 
     [TestMethod]
+    public void GetCombatStatsDisplay_WithArmor_ShowsPlayerProtection()
+    {
+        Player player = CreateTestPlayer();
+        player.Armor = new Armor("enchanted plate armor", 3);
+
+        string result = new Combat(player, CreateTestDragon(), CreateMessages()).GetCombatStatsDisplay();
+
+        StringAssert.Contains(result, "Health Points: 25" + Environment.NewLine + "Protection: 3");
+    }
+
+    [TestMethod]
+    public void GetCombatStatsDisplay_WithoutArmor_ShowsProtectionZero()
+    {
+        string result = new Combat(CreateTestPlayer(), CreateTestDragon(), CreateMessages()).GetCombatStatsDisplay();
+
+        StringAssert.Contains(result, "Protection: 0");
+    }
+
+    [TestMethod]
+    [DataRow("Spanish", "Proteccion: 3")]
+    [DataRow("French", "Protection: 3")]
+    [DataRow("Italian", "Protezione: 3")]
+    public void GetCombatStatsDisplay_ProtectionLabelIsTranslated(string language, string expected)
+    {
+        Player player = CreateTestPlayer();
+        player.Armor = new Armor("enchanted plate armor", 3);
+
+        string result = new Combat(player, CreateTestDragon(), CreateMessages(language)).GetCombatStatsDisplay();
+
+        StringAssert.Contains(result, expected);
+    }
+
+    [TestMethod]
     public void GetCombatStatsDisplay_UsesLocalizedStatLabels()
     {
         Player player = CreateTestPlayer();
         Dragon dragon = CreateTestDragon();
-        Messages messages = CreateEnglishMessages();
+        Messages messages = CreateMessages();
 
         Combat combat = new Combat(player, dragon, messages);
 

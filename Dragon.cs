@@ -92,13 +92,18 @@ public class Dragon
             return string.Join(Environment.NewLine, output);
         }
 
-        int damage = RollDamage();
-        player.HealthPoints -= damage;
+        int damageRolled = RollDamage();
+        int damageTaken = Math.Max(0, damageRolled - player.Protection);
+        player.HealthPoints -= damageTaken;
 
         if (player.HealthPoints < 0)
             player.HealthPoints = 0;
 
-        output.Add(string.Format(messages.GetMessage("dragon_damage_dealt"), Name, damage));
+        output.Add(string.Format(messages.GetMessage("dragon_damage_dealt"), Name, damageRolled));
+
+        if (player.Armor != null)
+            output.Add(DescribeArmorAbsorption(player.Armor, damageRolled - damageTaken, damageTaken, messages));
+
         output.Add(string.Format(messages.GetMessage("player_health_now"), player.Name, player.HealthPoints));
 
         if (player.HealthPoints <= 0)
@@ -107,6 +112,16 @@ public class Dragon
         return string.Join(Environment.NewLine, output);
     }
 
+
+    private static string DescribeArmorAbsorption(Armor armor, int damageAbsorbed, int damageTaken, Messages messages)
+    {
+        string armorName = messages.TranslateArmorForDisplay(armor.Name);
+
+        if (damageTaken == 0)
+            return string.Format(messages.GetMessage("armor_absorbed_whole_hit"), armorName);
+
+        return string.Format(messages.GetMessage("armor_absorbed"), armorName, damageAbsorbed, damageTaken);
+    }
 
     public string GetRandomDefenseTaunt(Messages messages)
     {
