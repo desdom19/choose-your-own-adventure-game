@@ -1,8 +1,8 @@
 public class Player
 {
     // Gold is rolled as d20 x 10, so 10-200 in steps of 10. Race doesn't change it.
-    public const int GoldDieSides = 20;
-    public const int GoldPerPoint = 10;
+    private const int GoldDieSides = 20;
+    private const int GoldRollMultiplier = 10;
 
     private readonly Die _die;
 
@@ -123,7 +123,7 @@ public class Player
     private void RollGold(Messages messages)
     {
         PromptRoll(messages.GetMessage("roll_gold"), messages);
-        Gold = _die.Roll(GoldDieSides) * GoldPerPoint;
+        Gold = _die.Roll(GoldDieSides) * GoldRollMultiplier;
     }
 
     private void PromptForNextAction(Messages messages)

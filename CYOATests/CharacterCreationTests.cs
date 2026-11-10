@@ -32,9 +32,7 @@ public class CharacterCreationTests
     public void CreateCharacter_GivesEachOccupationItsStartingWeapon(
         string occupation, string weaponType, int maxDamage, string asciiArt)
     {
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage("English");
-        messages.ReadDictionary();
+        Messages messages = CreateMessages();
 
         // Human, so no extra Agility roll: Strength d20 + d4 modifier, Agility d20, Health d20, Gold d20.
         Player player = new Player(new ScriptedDie(10, 2, 10, 10, 10));
