@@ -96,6 +96,43 @@ public class CharacterCreationTests
     }
 
     [TestMethod]
+    public void NewPlayer_HasNoArmor()
+    {
+        Assert.IsNull(new Player().Armor);
+    }
+
+    [TestMethod]
+    [DataRow("English", "Armor: shadow leathers", "Protection: 3")]
+    [DataRow("Spanish", "Armadura: cueros de las sombras", "Proteccion: 3")]
+    [DataRow("French", "Armure: cuirs des ombres", "Protection: 3")]
+    [DataRow("Italian", "Armatura: cuoio delle ombre", "Protezione: 3")]
+    public void DisplayStats_ShowsArmorAndProtection_WhenArmorIsOwned(
+        string language, string expectedArmorLine, string expectedProtectionLine)
+    {
+        Player player = new Player { Armor = new Armor("shadow leathers", 3) };
+        StringWriter output = new StringWriter();
+        Console.SetOut(output);
+
+        player.DisplayStats(CreateMessages(language));
+
+        StringAssert.Contains(output.ToString(), expectedArmorLine);
+        StringAssert.Contains(output.ToString(), expectedProtectionLine);
+    }
+
+    [TestMethod]
+    public void DisplayStats_HasNoArmorLines_WithoutArmor()
+    {
+        Player player = new Player();
+        StringWriter output = new StringWriter();
+        Console.SetOut(output);
+
+        player.DisplayStats(CreateMessages());
+
+        Assert.IsFalse(output.ToString().Contains("Armor:"), "No Armor line without Armor.");
+        Assert.IsFalse(output.ToString().Contains("Protection:"), "No Protection line without Armor.");
+    }
+
+    [TestMethod]
     public void CreateCharacter_RaceDoesNotChangeGold()
     {
         // Halfling: Strength d20 - d4, Agility d20 + d4, Health d20, Gold d20.

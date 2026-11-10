@@ -214,6 +214,23 @@ public class MessagesTests
         Assert.AreEqual(display, CreateItalianMessages().TranslateWeaponForDisplay(weapon));
     }
 
+    [TestMethod]
+    [DataRow("English", "enchanted plate armor", "warded robe", "shadow leathers", "elven cloak")]
+    [DataRow("Spanish", "armadura de placas encantada", "tunica protegida", "cueros de las sombras", "capa elfica")]
+    [DataRow("French", "armure de plaques enchantee", "robe protectrice", "cuirs des ombres", "cape elfique")]
+    [DataRow("Italian", "armatura a piastre incantata", "veste protettiva", "cuoio delle ombre", "mantello elfico")]
+    public void ArmorNames_AreTranslated(string language, string plate, string robe, string leathers, string cloak)
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage(language);
+        messages.ReadDictionary();
+
+        Assert.AreEqual(plate, messages.TranslateArmorForDisplay("enchanted plate armor"));
+        Assert.AreEqual(robe, messages.TranslateArmorForDisplay("warded robe"));
+        Assert.AreEqual(leathers, messages.TranslateArmorForDisplay("shadow leathers"));
+        Assert.AreEqual(cloak, messages.TranslateArmorForDisplay("elven cloak"));
+    }
+
     // Every language must have the same keys as English and the same {0}-style
     // placeholders, because the game passes each message to string.Format.
     [TestMethod]

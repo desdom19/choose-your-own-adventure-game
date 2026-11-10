@@ -1,22 +1,35 @@
 // The one place where each occupation's equipment is defined.
-// Later the Merchant's Magical Weapon and Armor for each occupation live here too.
+// Later the Merchant's Magical Weapon for each occupation lives here too.
 public class OccupationEquipment
 {
+    // Every Armor gives the same Protection, so every player gets the same value for the price.
+    private const int ArmorProtection = 3;
+
     private static readonly Dictionary<string, OccupationEquipment> _byOccupation =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            ["Fighter"] = new OccupationEquipment(new Weapon("long sword", 12, "-)=====>")),
-            ["Magician"] = new OccupationEquipment(new Weapon("lightning bolt spell", 12, "zap~~~~~~")),
-            ["Thief"] = new OccupationEquipment(new Weapon("dagger", 6, "-)==>")),
-            ["Archer"] = new OccupationEquipment(new Weapon("long bow", 8, "}    -->")),
+            ["Fighter"] = new OccupationEquipment(
+                new Weapon("long sword", 12, "-)=====>"),
+                new Armor("enchanted plate armor", ArmorProtection)),
+            ["Magician"] = new OccupationEquipment(
+                new Weapon("lightning bolt spell", 12, "zap~~~~~~"),
+                new Armor("warded robe", ArmorProtection)),
+            ["Thief"] = new OccupationEquipment(
+                new Weapon("dagger", 6, "-)==>"),
+                new Armor("shadow leathers", ArmorProtection)),
+            ["Archer"] = new OccupationEquipment(
+                new Weapon("long bow", 8, "}    -->"),
+                new Armor("elven cloak", ArmorProtection)),
         };
 
-    // A template only: never handed out, because Weapon is mutable.
+    // Templates only: never handed out, because Weapon and Armor are mutable.
     private readonly Weapon _startingWeapon;
+    private readonly Armor _armor;
 
-    private OccupationEquipment(Weapon startingWeapon)
+    private OccupationEquipment(Weapon startingWeapon, Armor armor)
     {
         _startingWeapon = startingWeapon;
+        _armor = armor;
     }
 
     // Returns null for an unknown occupation.
@@ -29,5 +42,13 @@ public class OccupationEquipment
     public Weapon CreateStartingWeapon()
     {
         return new Weapon(_startingWeapon.Type, _startingWeapon.MaxDamage, _startingWeapon.AsciiArt);
+    }
+
+    public string ArmorName => _armor.Name;
+
+    // A new Armor each time, so one player's Armor is never shared with another's.
+    public Armor CreateArmor()
+    {
+        return new Armor(_armor.Name, _armor.Protection);
     }
 }

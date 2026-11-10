@@ -22,6 +22,9 @@ public class Player
 
     public Weapon? Weapon { get; set; }
 
+    // Empty until the player buys Armor from the Merchant.
+    public Armor? Armor { get; set; }
+
     public void CreateCharacter(Messages messages)
     {
         Race = PromptForRace(messages);
@@ -157,6 +160,12 @@ public class Player
         {
             Console.WriteLine(messages.GetMessage("stats_weapon") + messages.TranslateWeaponForDisplay(Weapon.Type));
             Console.WriteLine(messages.GetMessage("stats_damage") + Weapon.MaxDamage);
+        }
+
+        if (Armor != null)
+        {
+            Console.WriteLine(messages.GetMessage("stats_armor") + messages.TranslateArmorForDisplay(Armor.Name));
+            Console.WriteLine(messages.GetMessage("stats_protection") + Armor.Protection);
         }
     }
 

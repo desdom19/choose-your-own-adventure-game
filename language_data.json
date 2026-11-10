@@ -37,10 +37,21 @@
       "stats_gold": "Gold: ",
       "stats_weapon": "Weapon: ",
       "stats_damage": "Weapon's Maximum Damage Points: ",
+      "stats_armor": "Armor: ",
+      "stats_protection": "Protection: ",
       "adventure_ends": "Adventure ends. Bye.",
       "path_prompt_full": "You are walking in the mountains. You see two paths, one leading north and higher into the mountains. The other path leads south and into the woods. Which do you take? Enter 'n' for North. Enter 's' for South. Enter 'e' for exit game.",
       "path_invalid": "Invalid choice. Please enter 'n', 's', or 'e'.",
-      "south_path_narrative": "You take the South path. After many long days, nothing adventurous happens. You are bored and return home, poor, and still bored.",
+      "south_path_merchant_narrative": "You take the South path into the woods. After a few hours you reach a clearing, where a cart painted in faded colors stands beside a small fire. A hooded Merchant looks up and smiles.",
+      "merchant_greeting": "'Welcome, traveler! Few come this way. Perhaps something here will help you on the road ahead.'",
+      "merchant_gold_shown": "You have {0} Gold.",
+      "merchant_menu_header": "The Merchant offers:",
+      "merchant_menu_armor": "1. Armor: {0} ({1} Gold)",
+      "merchant_menu_leave": "3. Leave",
+      "merchant_not_enough_gold": "You don't have enough Gold for that.",
+      "merchant_already_owned": "You already have that.",
+      "merchant_bought_armor": "You buy Armor ({0}) for {1} Gold.",
+      "merchant_back_at_crossroads": "You say farewell to the Merchant and walk back to the Crossroads.",
       "north_path_narrative": "You take the North path. After walking for hours, the air grows colder, and the trees become more sparse. You are confronted with a dragon. The dragon has a hoard of gold behind it.",
       "dragon_intro": "The dragon says 'I am {0}. Leave or perish!'",
       "dragon_stats_intro": "Your magic ring gives you the stats on the dragon.",
@@ -103,6 +114,12 @@
       "dagger": "dagger",
       "long bow": "long bow",
       "claws": "claws"
+    },
+    "displayArmorMap": {
+      "enchanted plate armor": "enchanted plate armor",
+      "warded robe": "warded robe",
+      "shadow leathers": "shadow leathers",
+      "elven cloak": "elven cloak"
     }
   },
   "Spanish": {
@@ -143,10 +160,21 @@
       "stats_gold": "Oro: ",
       "stats_weapon": "Arma: ",
       "stats_damage": "Puntos Maximos de Dano del Arma: ",
+      "stats_armor": "Armadura: ",
+      "stats_protection": "Proteccion: ",
       "adventure_ends": "La aventura termina. Adios.",
       "path_prompt_full": "Estas caminando en las montanas. Ves dos caminos, uno va al norte y mas arriba en las montanas. El otro va al sur y hacia el bosque. Cual tomas? Escribe 'n' para Norte. Escribe 's' para Sur. Escribe 'e' para salir del juego.",
       "path_invalid": "Opcion invalida. Por favor escribe 'n', 's' o 'e'.",
-      "south_path_narrative": "Tomas el camino del sur. Despues de muchos dias largos, no pasa nada aventurero. Te aburres y regresas a casa, pobre y todavia aburrido.",
+      "south_path_merchant_narrative": "Tomas el camino del sur hacia el bosque. Despues de unas horas llegas a un claro, donde un carro de colores destenidos descansa junto a una pequena hoguera. Un Mercader encapuchado levanta la vista y sonrie.",
+      "merchant_greeting": "'Bienvenido, viajero! Pocos pasan por aqui. Quizas algo de lo que tengo te ayude en el camino.'",
+      "merchant_gold_shown": "Tienes {0} de Oro.",
+      "merchant_menu_header": "El Mercader ofrece:",
+      "merchant_menu_armor": "1. Armadura: {0} ({1} de Oro)",
+      "merchant_menu_leave": "3. Irse",
+      "merchant_not_enough_gold": "No tienes suficiente Oro para eso.",
+      "merchant_already_owned": "Ya tienes eso.",
+      "merchant_bought_armor": "Compras Armadura ({0}) por {1} de Oro.",
+      "merchant_back_at_crossroads": "Te despides del Mercader y regresas a la encrucijada.",
       "north_path_narrative": "Tomas el camino del norte. Despues de caminar durante horas, el aire se vuelve mas frio y los arboles mas escasos. Te enfrentas a un dragon. El dragon tiene una horda de oro detras de el.",
       "dragon_intro": "El dragon dice 'Soy {0}. Vete o perece!'",
       "dragon_stats_intro": "Tu anillo magico te da las estadisticas del dragon.",
@@ -209,6 +237,12 @@
       "dagger": "daga",
       "long bow": "arco largo",
       "claws": "garras"
+    },
+    "displayArmorMap": {
+      "enchanted plate armor": "armadura de placas encantada",
+      "warded robe": "tunica protegida",
+      "shadow leathers": "cueros de las sombras",
+      "elven cloak": "capa elfica"
     }
   },
   "French": {
@@ -249,10 +283,21 @@
       "stats_gold": "Or: ",
       "stats_weapon": "Arme: ",
       "stats_damage": "Points de Dommages Maximum: ",
+      "stats_armor": "Armure: ",
+      "stats_protection": "Protection: ",
       "adventure_ends": "L'aventure se termine. Au revoir.",
       "path_prompt_full": "Vous marchez dans les montagnes. Vous voyez deux chemins, l'un mene vers le nord et plus haut dans les montagnes. L'autre mene vers le sud et dans les bois. Lequel choisissez-vous ? Tapez 'n' pour Nord. Tapez 's' pour Sud. Tapez 'e' pour quitter le jeu.",
       "path_invalid": "Choix invalide. Veuillez taper 'n', 's' ou 'e'.",
-      "south_path_narrative": "Vous prenez le chemin du sud. Apres de longues journees, rien d'aventureux n'arrive. Vous vous ennuyez et rentrez chez vous, pauvre et toujours ennuye.",
+      "south_path_merchant_narrative": "Vous prenez le chemin du sud vers les bois. Apres quelques heures, vous arrivez dans une clairiere ou une charrette aux couleurs passees se tient pres d'un petit feu. Un Marchand encapuchonne leve les yeux et sourit.",
+      "merchant_greeting": "'Bienvenue, voyageur ! Peu de gens passent par ici. Peut-etre que quelque chose ici vous aidera sur la route.'",
+      "merchant_gold_shown": "Votre Or: {0}.",
+      "merchant_menu_header": "Le Marchand propose:",
+      "merchant_menu_armor": "1. Armure: {0} ({1} Or)",
+      "merchant_menu_leave": "3. Partir",
+      "merchant_not_enough_gold": "Vous n'avez pas assez d'Or pour cela.",
+      "merchant_already_owned": "Vous avez deja cela.",
+      "merchant_bought_armor": "Vous achetez une Armure ({0}) pour {1} Or.",
+      "merchant_back_at_crossroads": "Vous dites adieu au Marchand et retournez au carrefour.",
       "north_path_narrative": "Vous prenez le chemin du nord. Apres avoir marche pendant des heures, l'air devient plus froid et les arbres plus rares. Vous etes confronte a un dragon. Le dragon a un tresor d'or derriere lui.",
       "dragon_intro": "Le dragon dit 'Je suis {0}. Pars ou peris !'",
       "dragon_stats_intro": "Votre anneau magique vous donne les statistiques du dragon.",
@@ -315,6 +360,12 @@
       "dagger": "dague",
       "long bow": "arc long",
       "claws": "griffes"
+    },
+    "displayArmorMap": {
+      "enchanted plate armor": "armure de plaques enchantee",
+      "warded robe": "robe protectrice",
+      "shadow leathers": "cuirs des ombres",
+      "elven cloak": "cape elfique"
     }
   },
   "Italian": {
@@ -355,10 +406,21 @@
       "stats_gold": "Oro: ",
       "stats_weapon": "Arma: ",
       "stats_damage": "Danno Massimo dell'Arma: ",
+      "stats_armor": "Armatura: ",
+      "stats_protection": "Protezione: ",
       "adventure_ends": "L'avventura finisce. Arrivederci.",
       "path_prompt_full": "Stai camminando in montagna. Vedi due sentieri: uno porta a nord, verso le vette; l'altro porta a sud, nel bosco. Quale prendi? Scrivi 'n' per Nord. Scrivi 's' per Sud. Scrivi 'e' per uscire dal gioco.",
       "path_invalid": "Scelta non valida. Scrivi 'n', 's' o 'e'.",
-      "south_path_narrative": "Prendi il sentiero a sud. Dopo molti lunghi giorni non accade nulla di avventuroso. Annoiato, torni a casa, povero e ancora annoiato.",
+      "south_path_merchant_narrative": "Prendi il sentiero a sud, nel bosco. Dopo qualche ora arrivi in una radura, dove un carro dai colori sbiaditi sta accanto a un piccolo fuoco. Un Mercante incappucciato alza lo sguardo e sorride.",
+      "merchant_greeting": "'Benvenuto, viaggiatore! Pochi passano di qui. Forse qualcosa qui ti aiutera nel cammino.'",
+      "merchant_gold_shown": "Il tuo Oro: {0}.",
+      "merchant_menu_header": "Il Mercante offre:",
+      "merchant_menu_armor": "1. Armatura: {0} ({1} Oro)",
+      "merchant_menu_leave": "3. Vai via",
+      "merchant_not_enough_gold": "Non hai abbastanza Oro per questo.",
+      "merchant_already_owned": "Ce l'hai gia.",
+      "merchant_bought_armor": "Compri un'Armatura ({0}) per {1} Oro.",
+      "merchant_back_at_crossroads": "Saluti il Mercante e torni al bivio.",
       "north_path_narrative": "Prendi il sentiero a nord. Dopo ore di cammino, l'aria si fa fredda e gli alberi si diradano. Ti trovi davanti a un drago. Dietro di lui brilla un tesoro d'oro.",
       "dragon_intro": "Il drago dice 'Io sono {0}. Vattene o morirai!'",
       "dragon_stats_intro": "Il tuo anello magico ti rivela le statistiche del drago.",
@@ -421,6 +483,12 @@
       "dagger": "pugnale",
       "long bow": "arco lungo",
       "claws": "artigli"
+    },
+    "displayArmorMap": {
+      "enchanted plate armor": "armatura a piastre incantata",
+      "warded robe": "veste protettiva",
+      "shadow leathers": "cuoio delle ombre",
+      "elven cloak": "mantello elfico"
     }
   }
 }
