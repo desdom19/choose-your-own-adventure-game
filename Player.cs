@@ -193,7 +193,7 @@ public class Player
     public string Attack(Dragon dragon, Messages messages)
     {
         if (Weapon == null)
-            return "You have no weapon to attack with.";
+            return messages.GetMessage("player_no_weapon");
 
         var output = new List<string>();
 
@@ -203,7 +203,6 @@ public class Player
             messages.TranslateWeaponForDisplay(Weapon.Type)
         ));
 
-        // If this fails to compile, change AsciiArt to whatever exists in Weapon.cs
         output.Add(Weapon.AsciiArt);
 
         int attackRoll = RollAttack();

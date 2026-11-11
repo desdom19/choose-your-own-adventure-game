@@ -40,4 +40,20 @@ public class PlayerTests
 
         Assert.AreEqual(13, dragon.HealthPoints);
     }
+
+    [TestMethod]
+    [DataRow("English", "You have no weapon to attack with.")]
+    [DataRow("Spanish", "No tienes ningun arma con la que atacar.")]
+    [DataRow("French", "Vous n'avez aucune arme pour attaquer.")]
+    [DataRow("Italian", "Non hai nessuna arma con cui attaccare.")]
+    public void Attack_WithoutWeapon_SaysSoInTheChosenLanguage(string language, string expected)
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage(language);
+        messages.ReadDictionary();
+
+        string result = new Player().Attack(new Dragon(new Die()), messages);
+
+        Assert.AreEqual(expected, result);
+    }
 }
