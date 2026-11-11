@@ -1,7 +1,7 @@
 public class Armor
 {
-    public string Name { get; set; }
-    public int Protection { get; set; }
+    public string Name { get; }
+    public int Protection { get; }
 
     public Armor(string name, int protection)
     {

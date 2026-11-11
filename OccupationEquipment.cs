@@ -30,7 +30,9 @@ public class OccupationEquipment
                 new Armor("elven cloak", ArmorProtection)),
         };
 
-    // Templates only: never handed out, because Weapon and Armor are mutable.
+    // Templates only: never handed out. Weapon is mutable, so sharing one would let a
+    // change to one player's weapon leak to others. Armor is read-only, but is copied too
+    // so every player gets their own.
     private readonly Weapon _startingWeapon;
     private readonly Weapon _magicalWeapon;
     private readonly Armor _armor;

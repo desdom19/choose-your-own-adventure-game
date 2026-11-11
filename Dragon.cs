@@ -7,26 +7,25 @@ public class Dragon
     public int Agility { get; set; }
     public int HealthPoints { get; set; }
 
-    // Weapon is now a real shared class in the repo.
     public Weapon Weapon { get; set; }
 
-    // Example use of taunts:
-    // string taunt = dragon.GetRandomDefenseTaunt().Replace("{race}", player.Race);
+    // Message keys, not text: the text is looked up in the player's language.
+    // A defense taunt can contain {0}, filled with the player's race (see Player.Attack).
     private readonly List<string> _defenseTauntKeys = new()
-{
-    "dragon_defense_taunt_1",
-    "dragon_defense_taunt_2",
-    "dragon_defense_taunt_3",
-    "dragon_defense_taunt_4"
-};
+    {
+        "dragon_defense_taunt_1",
+        "dragon_defense_taunt_2",
+        "dragon_defense_taunt_3",
+        "dragon_defense_taunt_4"
+    };
 
     private readonly List<string> _damageReplyKeys = new()
-{
-    "dragon_damage_reply_1",
-    "dragon_damage_reply_2",
-    "dragon_damage_reply_3",
-    "dragon_damage_reply_4"
-};
+    {
+        "dragon_damage_reply_1",
+        "dragon_damage_reply_2",
+        "dragon_damage_reply_3",
+        "dragon_damage_reply_4"
+    };
 
     public Dragon(Die die)
     {
