@@ -166,4 +166,20 @@ public class CharacterCreationTests
         Assert.IsTrue(reminder > goldPrompt, "Other input at the Gold prompt should show the 'type roll' reminder.");
         Assert.AreEqual(70, player.Gold);
     }
+
+    [TestMethod]
+    [DataRow("")]                                                // at the race prompt
+    [DataRow("human\n")]                                         // at the name prompt
+    [DataRow("human\nTestHero\n")]                               // at the occupation prompt
+    [DataRow("human\nTestHero\nfighter\nroll\n")]                // at a roll prompt
+    [DataRow("human\nTestHero\nfighter\nroll\nroll\nroll\nroll\n")] // at the next-action prompt
+    public void CreateCharacter_StopsInsteadOfLoopingForever_WhenInputEnds(string input)
+    {
+        Player player = new Player(new ScriptedDie(10, 2, 10, 10, 10));
+
+        Console.SetIn(new StringReader(input));
+        Console.SetOut(new StringWriter());
+
+        Assert.ThrowsException<EndOfStreamException>(() => player.CreateCharacter(CreateMessages()));
+    }
 }

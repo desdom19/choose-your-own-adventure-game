@@ -16,7 +16,7 @@ public class Game
         Console.WriteLine("Select language / Selecciona idioma / Choisissez la langue / Scegli la lingua:");
         Console.WriteLine("1. English  2. Espanol  3. Francais  4. Italiano");
         Console.Write("Enter choice: ");
-        string? langInput = Console.ReadLine()?.Trim();
+        string langInput = ConsoleInput.ReadLine();
         string selectedLanguage = langInput switch { "2" => "Spanish", "3" => "French", "4" => "Italian", _ => "English" };
 
         // Initialize Messages with selected language (per sequence diagram)
@@ -35,7 +35,7 @@ public class Game
         {
             Console.WriteLine(messages.GetMessage("menu"));
             Console.Write(messages.GetMessage("enter_choice"));
-            string? choice = Console.ReadLine()?.Trim();
+            string choice = ConsoleInput.ReadLine();
 
             if (choice == "1")
             {
@@ -120,7 +120,7 @@ public class Game
         {
             Console.WriteLine(messages.GetMessage("path_prompt_full"));
             Console.Write(messages.GetMessage("enter_choice"));
-            string? input = Console.ReadLine()?.Trim().ToLower();
+            string input = ConsoleInput.ReadLine().ToLower();
 
             if (input == "north" || input == "n")
                 return "north";
@@ -149,7 +149,7 @@ public class Game
         {
             Console.WriteLine(messages.GetMessage("dragon_encounter_prompt"));
             Console.Write(messages.GetMessage("enter_choice"));
-            string? input = Console.ReadLine()?.Trim().ToLower();
+            string input = ConsoleInput.ReadLine().ToLower();
 
             if (input == "a" || input == "attack")
             {
