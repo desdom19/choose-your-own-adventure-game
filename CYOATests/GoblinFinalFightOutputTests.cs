@@ -120,7 +120,7 @@ public class GoblinFinalFightOutputTests
             Agility: 10
             Health Points: 6
             Weapon: rusty cleaver
-            Weapon's Maximum Damage Points: 8
+            Weapon's Maximum Damage Points: 9
             As a Fighter, you withdraw your flaming sword and attack the goblin.
             -)=====>~*~*
             You hit Gritknuckle.
@@ -170,7 +170,7 @@ public class GoblinFinalFightOutputTests
             Agility: 10
             Health Points: 6
             Weapon: rusty cleaver
-            Weapon's Maximum Damage Points: 8
+            Weapon's Maximum Damage Points: 9
             As a Fighter, you withdraw your flaming sword and attack the goblin.
             -)=====>~*~*
             You missed Gritknuckle.

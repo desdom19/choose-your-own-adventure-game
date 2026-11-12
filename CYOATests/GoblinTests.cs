@@ -51,7 +51,7 @@ public class GoblinTests
 
         Assert.AreEqual("Gritknuckle", goblin.Name);
         Assert.AreEqual("rusty cleaver", goblin.Weapon.Type);
-        Assert.AreEqual(8, goblin.Weapon.MaxDamage);
+        Assert.AreEqual(9, goblin.Weapon.MaxDamage);
         Assert.IsFalse(string.IsNullOrWhiteSpace(goblin.Weapon.AsciiArt));
         Assert.AreNotEqual(new Dragon(new ScriptedDie(1, 1, 1)).Weapon.AsciiArt, goblin.Weapon.AsciiArt);
     }

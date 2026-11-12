@@ -22,7 +22,7 @@ public class Goblin : Monster
     };
 
     public Goblin(Die die)
-        : base(die, "Gritknuckle", new Weapon("rusty cleaver", 8, "|=[####]"))
+        : base(die, "Gritknuckle", new Weapon("rusty cleaver", 9, "|=[####]"))
     {
         Strength = _die.Roll(20);
         Agility = AgilityBase + _die.Roll(AgilityDieSides);
