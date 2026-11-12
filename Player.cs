@@ -218,8 +218,8 @@ public class Player
 
         int defenseRoll = _die.Roll(20);
 
-        // DEFENSE
-        if (defenseRoll <= monster.Agility)
+        // DEFENSE: a roll of 20 never dodges, so a Monster with Agility 20 can still be hurt.
+        if (defenseRoll < 20 && defenseRoll <= monster.Agility)
         {
             output.Add(string.Format(messages.GetMessage("monster_defended_player_attack"), monster.Name));
             output.Add(string.Format(

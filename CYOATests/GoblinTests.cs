@@ -224,6 +224,39 @@ public class GoblinTests
             "Over here, Dwarf! No, over here! Hee hee!"), result);
     }
 
+    [TestMethod]
+    public void PlayerAttack_DefenseRollOfTwenty_LandsEvenAgainstAgilityTwenty()
+    {
+        // The Goblin rolls its highest Agility, 5 + 15 = 20. A defense roll of 20 never
+        // dodges, so a fight against it can always be won.
+        Goblin goblin = new Goblin(new ScriptedDie(10, 15, 10, 1));
+        Player player = new Player(new ScriptedDie(1, 20, 4))
+        {
+            Race = "Human",
+            Occupation = "Thief",
+            Strength = 15,
+            Weapon = new Weapon("dagger", 6, "--|=>")
+        };
+
+        string result = player.Attack(goblin, GetMessages());
+
+        Assert.AreEqual(6, goblin.HealthPoints);
+        StringAssert.Contains(result, "Gritknuckle's health points are now 6.");
+    }
+
+    [TestMethod]
+    public void Attack_DefenseRollOfTwenty_LandsEvenAgainstPlayerAgilityAboveTwenty()
+    {
+        // An Elf can reach Agility 24. A defense roll of 20 still never dodges.
+        Player player = CreateTargetPlayer();
+        player.Agility = 24;
+
+        string result = CreateGoblin(1, 20, 6).Attack(player, GetMessages());
+
+        Assert.AreEqual(24, player.HealthPoints);
+        StringAssert.Contains(result, "Gritknuckle deals 6 damage.");
+    }
+
     private static string[] TextsForKeys(Messages messages, string keyPrefix, int count)
     {
         return Enumerable.Range(1, count).Select(i => messages.GetMessage(keyPrefix + i)).ToArray();
