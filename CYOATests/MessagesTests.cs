@@ -116,7 +116,7 @@ public class MessagesTests
 
         string[] requiredKeys = { "welcome", "menu",
                                    "choose_path", "path_north", "path_south", "attack_prompt",
-                                   "victory", "defeat", "retreat", "invalid", "goodbye" };
+                                   "dragon_victory", "dragon_defeat", "retreat", "invalid", "goodbye" };
 
         foreach (string key in requiredKeys)
         {
@@ -134,7 +134,7 @@ public class MessagesTests
 
         string[] requiredKeys = { "welcome", "menu",
                                    "choose_path", "path_north", "path_south", "attack_prompt",
-                                   "victory", "defeat", "retreat", "invalid", "goodbye" };
+                                   "dragon_victory", "dragon_defeat", "retreat", "invalid", "goodbye" };
 
         foreach (string key in requiredKeys)
         {
@@ -152,7 +152,7 @@ public class MessagesTests
 
         string[] requiredKeys = { "welcome", "menu",
                                    "choose_path", "path_north", "path_south", "attack_prompt",
-                                   "victory", "defeat", "retreat", "invalid", "goodbye" };
+                                   "dragon_victory", "dragon_defeat", "retreat", "invalid", "goodbye" };
 
         foreach (string key in requiredKeys)
         {

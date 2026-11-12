@@ -300,7 +300,7 @@ public class GamePbi18Tests
     }
 
     [TestMethod]
-    public void HandleDragonEncounter_AttackPath_DisplaysEncounterFlowText()
+    public void HandleEncounter_DragonAttackPath_DisplaysEncounterFlowText()
     {
         Game game = new Game();
         Die die = new Die();
@@ -328,20 +328,20 @@ public class GamePbi18Tests
         Console.SetOut(writer);
 
         MethodInfo? method = typeof(Game).GetMethod(
-            "HandleDragonEncounter",
+            "HandleEncounter",
             BindingFlags.NonPublic | BindingFlags.Instance
         );
 
-        Assert.IsNotNull(method, "HandleDragonEncounter method was not found.");
+        Assert.IsNotNull(method, "HandleEncounter method was not found.");
 
         method!.Invoke(game, new object[] { player, dragon, messages });
 
         string output = writer.ToString();
 
-        StringAssert.Contains(output, messages.GetMessage("north_path_narrative"));
+        StringAssert.Contains(output, messages.GetMessage("dragon_path_narrative"));
         StringAssert.Contains(output, string.Format(messages.GetMessage("dragon_intro"), dragon.Name));
         StringAssert.Contains(output, messages.GetMessage("dragon_stats_intro"));
-        StringAssert.Contains(output, messages.GetMessage("dragon_encounter_prompt"));
+        StringAssert.Contains(output, messages.GetMessage("encounter_prompt"));
     }
 
     [TestMethod]
@@ -351,10 +351,10 @@ public class GamePbi18Tests
         messages.SetCurrentLanguage("English");
         messages.ReadDictionary();
 
-        Assert.AreNotEqual("[north_path_narrative]", messages.GetMessage("north_path_narrative"));
+        Assert.AreNotEqual("[dragon_path_narrative]", messages.GetMessage("dragon_path_narrative"));
         Assert.AreNotEqual("[dragon_intro]", messages.GetMessage("dragon_intro"));
         Assert.AreNotEqual("[dragon_stats_intro]", messages.GetMessage("dragon_stats_intro"));
-        Assert.AreNotEqual("[dragon_encounter_prompt]", messages.GetMessage("dragon_encounter_prompt"));
+        Assert.AreNotEqual("[encounter_prompt]", messages.GetMessage("encounter_prompt"));
         Assert.AreNotEqual("[dragon_stats_header]", messages.GetMessage("dragon_stats_header"));
     }
 }

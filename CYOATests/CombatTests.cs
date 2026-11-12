@@ -47,7 +47,7 @@ public class CombatTests
         Combat combat = new Combat(player, dragon, messages);
 
         Assert.AreSame(player, combat.player);
-        Assert.AreSame(dragon, combat.dragon);
+        Assert.AreSame(dragon, combat.monster);
     }
 
     [TestMethod]
@@ -89,7 +89,7 @@ public class CombatTests
 
         StringAssert.Contains(result, messages.GetMessage("combat_stats_header"));
         StringAssert.Contains(result, messages.GetMessage("combat_player_header"));
-        StringAssert.Contains(result, messages.GetMessage("combat_dragon_header"));
+        StringAssert.Contains(result, messages.GetMessage("dragon_combat_header"));
     }
 
     [TestMethod]
