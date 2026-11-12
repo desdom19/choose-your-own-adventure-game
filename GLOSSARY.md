@@ -1,14 +1,28 @@
 # Choose Your Own Adventure
 
-A console adventure in which a player creates a character, picks a path at a crossroads, and may face a dragon.
+A console adventure in which a player creates a character, picks a path at a crossroads, and may face a Monster.
 
 ## Language
 
 ### Places and encounters
 
 **Crossroads**:
-The point in the mountains where the player chooses to go north, go south, or exit.
+The point in the mountains where the player chooses to go north, go south, go west, or exit.
 _Avoid_: Path menu, fork
+
+**Monster**:
+A creature the player meets at the end of a path and fights in a Final Fight. The Dragon and the Goblin are Monsters.
+_Avoid_: Enemy, boss, creature
+
+**Final Fight**:
+The fight with a Monster that ends the adventure, whether the player wins, loses or retreats.
+_Avoid_: Boss fight, battle
+
+**Dragon**:
+The Monster met on the north path.
+
+**Goblin**:
+The Monster met on the west path.
 
 **Merchant**:
 A trader met on the south path who sells Armor and Magical Weapons for Gold.
