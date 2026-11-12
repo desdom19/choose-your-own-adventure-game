@@ -11,6 +11,7 @@ public class Game
         Die die = new Die();
 
         Dragon dragon = new Dragon(die);
+        Goblin goblin = new Goblin(die);
 
         // Language selection shown before Messages dictionary is loaded
         Console.WriteLine("Select language / Selecciona idioma / Choisissez la langue / Scegli la lingua:");
@@ -59,9 +60,9 @@ public class Game
                         Merchant.Visit(player, messages);
                         Console.WriteLine(messages.GetMessage("merchant_back_at_crossroads"));
                     }
-                    else if (selectedPath == "north")
+                    else if (selectedPath == "north" || selectedPath == "west")
                     {
-                        HandleEncounter(player, dragon, messages);
+                        HandleEncounter(player, selectedPath == "north" ? dragon : goblin, messages);
 
                         running = false;
                         inAdventureMenu = false;
@@ -104,6 +105,7 @@ public class Game
         string trimmed = input.Trim().ToLower();
         return trimmed == "n" || trimmed == "north" ||
                trimmed == "s" || trimmed == "south" ||
+               trimmed == "w" || trimmed == "west" ||
                trimmed == "e" || trimmed == "exit";
     }
 
@@ -128,6 +130,9 @@ public class Game
 
             if (input == "south" || input == "s")
                 return "south";
+
+            if (input == "west" || input == "w")
+                return "west";
 
             if (input == "exit" || input == "e")
                 return "exit";
