@@ -1,0 +1,44 @@
+// The Monster met on the west path. It's slippery, so it dodges more often than the
+// Dragon (Agility is never below 6), but its rusty cleaver hurts less than claws.
+public class Goblin : Monster
+{
+    private const int AgilityBase = 5;
+    private const int AgilityDieSides = 15;
+
+    private static readonly IReadOnlyList<string> _defenseTauntKeys = new[]
+    {
+        "goblin_defense_taunt_1",
+        "goblin_defense_taunt_2",
+        "goblin_defense_taunt_3",
+        "goblin_defense_taunt_4"
+    };
+
+    private static readonly IReadOnlyList<string> _damageReplyKeys = new[]
+    {
+        "goblin_damage_reply_1",
+        "goblin_damage_reply_2",
+        "goblin_damage_reply_3",
+        "goblin_damage_reply_4"
+    };
+
+    public Goblin(Die die)
+        : base(die, "Gritknuckle", new Weapon("rusty cleaver", 8, "|=[####]"))
+    {
+        Strength = _die.Roll(20);
+        Agility = AgilityBase + _die.Roll(AgilityDieSides);
+        HealthPoints = _die.Roll(20);
+    }
+
+    public override string PathNarrativeKey => "goblin_path_narrative";
+    public override string IntroKey => "goblin_intro";
+    public override string StatsIntroKey => "goblin_stats_intro";
+    public override string StatsHeaderKey => "goblin_stats_header";
+    public override string CombatHeaderKey => "goblin_combat_header";
+    public override string PlayerAttackIntroKey => "goblin_player_attack_intro";
+    public override string DefeatedNarrativeKey => "goblin_defeated_narrative";
+    public override string VictoryKey => "goblin_victory";
+    public override string DefeatKey => "goblin_defeat";
+
+    protected override IReadOnlyList<string> DefenseTauntKeys => _defenseTauntKeys;
+    protected override IReadOnlyList<string> DamageReplyKeys => _damageReplyKeys;
+}
