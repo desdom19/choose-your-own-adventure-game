@@ -28,9 +28,9 @@ public class CrossroadsTests
     [TestMethod]
     public void StartGame_WestPath_LeadsToTheGoblin_AndRetreatingEndsTheGame()
     {
-        // English, new game, full character creation, west, then retreat at the encounter prompt.
+        // English, new game, Normal, full character creation, west, then retreat at the encounter prompt.
         // Retreating before combat never rolls a die, so the real Die inside Game doesn't matter.
-        Console.SetIn(new StringReader("1\n1\nhuman\nTestHero\nfighter\nroll\nroll\nroll\nroll\n2\nw\nr\n"));
+        Console.SetIn(new StringReader("1\n1\n2\nhuman\nTestHero\nfighter\nroll\nroll\nroll\nroll\n2\nw\nr\n"));
         StringWriter output = new StringWriter();
         Console.SetOut(output);
 

@@ -105,6 +105,11 @@
       "goblin_damage_reply_2": "You'll pay for that, you big lump!",
       "goblin_damage_reply_3": "Yowch! That's going to leave a mark!",
       "goblin_damage_reply_4": "Lucky hit! Won't happen twice!",
+      "difficulty_prompt": "Choose a Difficulty; 1. Easy, 2. Normal or 3. Hard. Type '1', '2' or '3'",
+      "difficulty_easy": "Easy",
+      "difficulty_normal": "Normal",
+      "difficulty_hard": "Hard",
+      "difficulty_chosen": "You chose the {0} Difficulty.",
       "enter_choice": "Enter choice: "
     },
     "raceMap": {
@@ -256,6 +261,11 @@
       "goblin_damage_reply_2": "Me las pagaras, grandullon!",
       "goblin_damage_reply_3": "Auch! Eso me va a dejar marca!",
       "goblin_damage_reply_4": "Golpe de suerte! No pasara dos veces!",
+      "difficulty_prompt": "Elige una Dificultad; 1. Facil, 2. Normal o 3. Dificil. Escribe '1', '2' o '3'",
+      "difficulty_easy": "Facil",
+      "difficulty_normal": "Normal",
+      "difficulty_hard": "Dificil",
+      "difficulty_chosen": "Elegiste la Dificultad {0}.",
       "enter_choice": "Escribe tu opcion: "
     },
     "raceMap": {
@@ -407,6 +417,11 @@
       "goblin_damage_reply_2": "Tu vas me le payer, gros balourd!",
       "goblin_damage_reply_3": "Ouille! Ca va laisser une marque!",
       "goblin_damage_reply_4": "Coup de chance! Ca n'arrivera pas deux fois!",
+      "difficulty_prompt": "Choisissez une Difficulte; 1. Facile, 2. Normale ou 3. Difficile. Tapez '1', '2' ou '3'",
+      "difficulty_easy": "Facile",
+      "difficulty_normal": "Normale",
+      "difficulty_hard": "Difficile",
+      "difficulty_chosen": "Vous avez choisi la Difficulte {0}.",
       "enter_choice": "Entrez votre choix : "
     },
     "raceMap": {
@@ -558,6 +573,11 @@
       "goblin_damage_reply_2": "Me la pagherai, bestione!",
       "goblin_damage_reply_3": "Ahia! Questo lascera il segno!",
       "goblin_damage_reply_4": "Colpo di fortuna! Non succedera due volte!",
+      "difficulty_prompt": "Scegli una Difficolta; 1. Facile, 2. Normale o 3. Difficile. Scrivi '1', '2' o '3'",
+      "difficulty_easy": "Facile",
+      "difficulty_normal": "Normale",
+      "difficulty_hard": "Difficile",
+      "difficulty_chosen": "Hai scelto la Difficolta {0}.",
       "enter_choice": "Inserisci la tua scelta: "
     },
     "raceMap": {

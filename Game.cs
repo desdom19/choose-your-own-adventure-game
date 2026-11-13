@@ -10,9 +10,6 @@ public class Game
         // Instantiate Die first (per sequence diagram)
         Die die = new Die();
 
-        Dragon dragon = new Dragon(die);
-        Goblin goblin = new Goblin(die);
-
         // Language selection shown before Messages dictionary is loaded
         Console.WriteLine("Select language / Selecciona idioma / Choisissez la langue / Scegli la lingua:");
         Console.WriteLine("1. English  2. Espanol  3. Francais  4. Italiano");
@@ -40,6 +37,10 @@ public class Game
 
             if (choice == "1")
             {
+                Difficulty difficulty = PromptForDifficulty(messages);
+                Dragon dragon = new Dragon(die, difficulty);
+                Goblin goblin = new Goblin(die, difficulty);
+
                 Player player = new Player();
                 player.CreateCharacter(messages);
 
@@ -115,6 +116,33 @@ public class Game
         string trimmed = input.Trim().ToLower();
         return trimmed == "a" || trimmed == "attack" ||
                trimmed == "r" || trimmed == "retreat";
+    }
+
+    private Difficulty PromptForDifficulty(Messages messages)
+    {
+        while (true)
+        {
+            Console.WriteLine(messages.GetMessage("difficulty_prompt"));
+            Console.Write(messages.GetMessage("enter_choice"));
+            string input = ConsoleInput.ReadLine();
+
+            if (input == "1")
+                return ConfirmDifficulty(Difficulty.Easy, "difficulty_easy", messages);
+
+            if (input == "2")
+                return ConfirmDifficulty(Difficulty.Normal, "difficulty_normal", messages);
+
+            if (input == "3")
+                return ConfirmDifficulty(Difficulty.Hard, "difficulty_hard", messages);
+
+            Console.WriteLine(messages.GetMessage("invalid"));
+        }
+    }
+
+    private static Difficulty ConfirmDifficulty(Difficulty difficulty, string nameKey, Messages messages)
+    {
+        Console.WriteLine(string.Format(messages.GetMessage("difficulty_chosen"), messages.GetMessage(nameKey)));
+        return difficulty;
     }
 
     private string PromptForPath(Messages messages)

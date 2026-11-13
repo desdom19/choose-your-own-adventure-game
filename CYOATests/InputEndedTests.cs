@@ -40,8 +40,8 @@ public class InputEndedTests
     [TestMethod]
     public void StartGame_Stops_WhenInputEndsAtThePathPrompt()
     {
-        // English, new game, full character creation, then input ends at the crossroads.
-        Console.SetIn(new StringReader("1\n1\nhuman\nTestHero\nfighter\nroll\nroll\nroll\nroll\n2\n"));
+        // English, new game, Normal, full character creation, then input ends at the crossroads.
+        Console.SetIn(new StringReader("1\n1\n2\nhuman\nTestHero\nfighter\nroll\nroll\nroll\nroll\n2\n"));
 
         Assert.ThrowsException<EndOfStreamException>(() => new Game().StartGame());
     }
