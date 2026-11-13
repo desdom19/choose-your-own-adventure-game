@@ -17,12 +17,17 @@ public class Dragon : Monster
         "dragon_damage_reply_4"
     };
 
-    public Dragon(Die die)
-        : base(die, "Smolderfang", new Weapon("claws", 12, "<<< claws >>>"))
+    public Dragon(Die die, Difficulty? difficulty = null)
+        : base(die, "Smolderfang", new Weapon("claws", 12, "<<< claws >>>"), difficulty, RollStats)
     {
-        Strength = _die.Roll(20);
-        Agility = _die.Roll(20);
-        HealthPoints = _die.Roll(20);
+    }
+
+    private static RolledStats RollStats(Die die)
+    {
+        int strength = die.Roll(20);
+        int agility = die.Roll(20);
+        int healthPoints = die.Roll(20);
+        return new RolledStats(strength, agility, healthPoints);
     }
 
     public override string PathNarrativeKey => "dragon_path_narrative";

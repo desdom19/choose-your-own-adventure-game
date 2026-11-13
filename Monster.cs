@@ -12,11 +12,24 @@ public abstract class Monster
 
     public Weapon Weapon { get; set; }
 
-    protected Monster(Die die, string name, Weapon weapon)
+    // The stats a Monster rolls when it's created, before Difficulty changes them.
+    protected record RolledStats(int Strength, int Agility, int HealthPoints);
+
+    // The Monster rolls its stats, then the Difficulty changes them and the maximum damage
+    // of its own weapon. A Monster built without a Difficulty gets Normal.
+    protected Monster(Die die, string name, Weapon weapon, Difficulty? difficulty, Func<Die, RolledStats> rollStats)
     {
         _die = die;
         Name = name;
         Weapon = weapon;
+
+        difficulty ??= Difficulty.Normal;
+        RolledStats rolled = rollStats(die);
+
+        Strength = difficulty.ChangeStrength(rolled.Strength);
+        Agility = difficulty.ChangeAgility(rolled.Agility);
+        HealthPoints = difficulty.ChangeHealthPoints(rolled.HealthPoints);
+        Weapon.MaxDamage = difficulty.ChangeWeaponMaxDamage(Weapon.MaxDamage);
     }
 
     // Message keys for this Monster's own text, looked up in the player's language.

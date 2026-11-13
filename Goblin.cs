@@ -1,5 +1,6 @@
 // The Monster met on the west path. It's slippery, so it dodges more often than the
-// Dragon (Agility is never below 6), but its rusty cleaver hurts less than claws.
+// Dragon (on Normal its Agility is never below 6; on Easy it can be as low as 3), but its
+// rusty cleaver hurts less than claws.
 public class Goblin : Monster
 {
     private const int AgilityBase = 5;
@@ -21,12 +22,17 @@ public class Goblin : Monster
         "goblin_damage_reply_4"
     };
 
-    public Goblin(Die die)
-        : base(die, "Gritknuckle", new Weapon("rusty cleaver", 9, "|=[####]"))
+    public Goblin(Die die, Difficulty? difficulty = null)
+        : base(die, "Gritknuckle", new Weapon("rusty cleaver", 9, "|=[####]"), difficulty, RollStats)
     {
-        Strength = _die.Roll(20);
-        Agility = AgilityBase + _die.Roll(AgilityDieSides);
-        HealthPoints = _die.Roll(20);
+    }
+
+    private static RolledStats RollStats(Die die)
+    {
+        int strength = die.Roll(20);
+        int agility = AgilityBase + die.Roll(AgilityDieSides);
+        int healthPoints = die.Roll(20);
+        return new RolledStats(strength, agility, healthPoints);
     }
 
     public override string PathNarrativeKey => "goblin_path_narrative";
