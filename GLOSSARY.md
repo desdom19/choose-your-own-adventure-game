@@ -4,6 +4,12 @@ A console adventure in which a player creates a character, picks a path at a cro
 
 ## Language
 
+### Game
+
+**Difficulty**:
+The player's choice of how strong the Monsters are: Easy, Normal or Hard. It's made once at the start of an adventure and can't be changed. Normal is the game's standard balance.
+_Avoid_: Mode, level, setting
+
 ### Places and encounters
 
 **Crossroads**:
