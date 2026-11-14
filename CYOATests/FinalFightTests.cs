@@ -1,38 +1,8 @@
-using System.IO;
-
 // What a Final Fight returns and the choices it asks for, through FinalFight.Run.
 [TestClass]
 [DoNotParallelize]
 public class FinalFightTests
 {
-    private TextReader? _originalIn;
-    private TextWriter? _originalOut;
-
-    [TestInitialize]
-    public void Setup()
-    {
-        _originalIn = Console.In;
-        _originalOut = Console.Out;
-    }
-
-    [TestCleanup]
-    public void Cleanup()
-    {
-        if (_originalIn != null)
-            Console.SetIn(_originalIn);
-
-        if (_originalOut != null)
-            Console.SetOut(_originalOut);
-    }
-
-    private static Messages GetMessages()
-    {
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage("English");
-        messages.ReadDictionary();
-        return messages;
-    }
-
     // The player's own Die is empty: every roll in a Final Fight comes from the Die given to Run.
     private static Player CreatePlayer(int healthPoints)
     {
@@ -54,16 +24,11 @@ public class FinalFightTests
         return new Goblin(new ScriptedDie(10, 5, 6));
     }
 
-    // Runs a Final Fight whose rolls, in fight order, all come from the one Die given to Run.
+    // An English Final Fight, with the trailing newline trimmed so tests can match the ending.
     private static FinalFightOutcome Run(string input, Player player, Monster monster, int[] rolls, out string output)
     {
-        Console.SetIn(new StringReader(input));
-        using StringWriter writer = new StringWriter();
-        Console.SetOut(writer);
-
-        FinalFightOutcome outcome = FinalFight.Run(player, monster, GetMessages(), new ScriptedDie(rolls));
-
-        output = writer.ToString().Replace("\r\n", "\n").TrimEnd();
+        FinalFightOutcome outcome = ScriptedFinalFight.Play(input, player, monster, ScriptedFinalFight.GetMessages(), rolls, out output);
+        output = output.TrimEnd();
         return outcome;
     }
 
