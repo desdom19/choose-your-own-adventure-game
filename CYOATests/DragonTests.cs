@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 [TestClass]
 public class DragonTests
@@ -300,9 +299,8 @@ public class GamePbi18Tests
     }
 
     [TestMethod]
-    public void HandleEncounter_DragonAttackPath_DisplaysEncounterFlowText()
+    public void FinalFight_DragonAttackPath_DisplaysEncounterFlowText()
     {
-        Game game = new Game();
         Die die = new Die();
         Dragon dragon = new Dragon(die);
 
@@ -321,20 +319,13 @@ public class GamePbi18Tests
         messages.SetCurrentLanguage("English");
         messages.ReadDictionary();
 
-        // "a" enters combat, then "r" retreats from Combat immediately
+        // "a" starts the fight, then "r" retreats after the first Round
         Console.SetIn(new StringReader("a\nr\n"));
 
         using StringWriter writer = new StringWriter();
         Console.SetOut(writer);
 
-        MethodInfo? method = typeof(Game).GetMethod(
-            "HandleEncounter",
-            BindingFlags.NonPublic | BindingFlags.Instance
-        );
-
-        Assert.IsNotNull(method, "HandleEncounter method was not found.");
-
-        method!.Invoke(game, new object[] { player, dragon, messages });
+        FinalFight.Run(player, dragon, messages, die);
 
         string output = writer.ToString();
 

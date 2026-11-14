@@ -107,9 +107,16 @@ public class MerchantTests
         StringWriter summary = new StringWriter();
         Console.SetOut(summary);
         player.DisplayStats(messages);
-        string combatStats = new Combat(player, new Dragon(new Die()), messages).GetCombatStatsDisplay();
 
-        foreach (string shown in new[] { summary.ToString(), combatStats })
+        // A Final Fight shows both sides' stats once the player attacks. With Strength 0 the
+        // player misses, the Dragon misses (20), and with 0 Health Points the fight is lost.
+        StringWriter combatStats = new StringWriter();
+        Console.SetIn(new StringReader("a\n"));
+        Console.SetOut(combatStats);
+        FinalFightOutcome outcome = FinalFight.Run(player, new Dragon(new ScriptedDie(10, 10, 10, 20)), messages, new ScriptedDie());
+        Assert.AreEqual(FinalFightOutcome.Lost, outcome);
+
+        foreach (string shown in new[] { summary.ToString(), combatStats.ToString() })
         {
             StringAssert.Contains(shown, messages.GetMessage("stats_weapon") + "daga venenosa");
             StringAssert.Contains(shown, messages.GetMessage("stats_damage") + "10");

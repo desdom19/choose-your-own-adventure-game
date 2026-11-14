@@ -63,7 +63,8 @@ public class Game
                     }
                     else if (selectedPath == "north" || selectedPath == "west")
                     {
-                        HandleEncounter(player, selectedPath == "north" ? dragon : goblin, messages);
+                        // Every outcome ends the adventure.
+                        FinalFight.Run(player, selectedPath == "north" ? dragon : goblin, messages, die);
 
                         running = false;
                         inAdventureMenu = false;
@@ -80,17 +81,6 @@ public class Game
                 Console.WriteLine(messages.GetMessage("invalid"));
             }
         }
-    }
-
-    // Retreat text is the same for every Monster; victory and defeat text is the Monster's own.
-    public void EndGame(Monster monster, bool playerWon, bool playerRetreated, Messages messages)
-    {
-        if (playerRetreated)
-            Console.WriteLine(messages.GetMessage("retreat"));
-        else if (playerWon)
-            Console.WriteLine(messages.GetMessage(monster.VictoryKey));
-        else
-            Console.WriteLine(messages.GetMessage(monster.DefeatKey));
     }
 
     public bool IsValidMenuChoice(string? input)
@@ -166,47 +156,6 @@ public class Game
                 return "exit";
 
             Console.WriteLine(messages.GetMessage("path_invalid"));
-        }
-    }
-
-    // The encounter at the end of a path: the Monster's path narrative, its intro in red,
-    // its stats, then the attack-or-retreat prompt. Every outcome ends the adventure.
-    private void HandleEncounter(Player player, Monster monster, Messages messages)
-    {
-        Console.WriteLine(messages.GetMessage(monster.PathNarrativeKey));
-
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(string.Format(messages.GetMessage(monster.IntroKey), monster.Name));
-        Console.ResetColor();
-
-        Console.WriteLine(messages.GetMessage(monster.StatsIntroKey));
-        monster.DisplayStats(messages);
-
-        while (true)
-        {
-            Console.WriteLine(messages.GetMessage("encounter_prompt"));
-            Console.Write(messages.GetMessage("enter_choice"));
-            string input = ConsoleInput.ReadLine().ToLower();
-
-            if (input == "a" || input == "attack")
-            {
-                Combat combat = new Combat(player, monster, messages);
-                bool playerWon = combat.StartCombat();
-
-                // Combat has already shown the retreat message.
-                if (!combat.PlayerRetreated)
-                    EndGame(monster, playerWon, false, messages);
-
-                return;
-            }
-
-            if (input == "r" || input == "retreat")
-            {
-                Console.WriteLine(messages.GetMessage("retreat"));
-                return;
-            }
-
-            Console.WriteLine(messages.GetMessage("invalid"));
         }
     }
 }

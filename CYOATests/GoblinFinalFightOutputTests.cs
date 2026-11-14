@@ -1,5 +1,4 @@
 using System.IO;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 // The text a Goblin Final Fight prints: whole fights with scripted rolls and console
@@ -70,40 +69,51 @@ public class GoblinFinalFightOutputTests
         Assert.AreEqual(expected.Replace("\r\n", "\n").TrimEnd(), actual.TrimEnd());
     }
 
-    // Plays a Combat and then shows its ending, as the encounter does: a retreat in
-    // combat has already shown its own message, so no ending follows it.
-    private static string PlayCombat(string input, Player player, Goblin goblin, Messages messages, out bool playerWon)
+    // Runs the whole Final Fight, from the path narrative to the ending.
+    private static string PlayFinalFight(string input, Player player, Goblin goblin, Messages messages, out FinalFightOutcome outcome)
     {
-        bool won = false;
-        string output = Capture(input, () =>
-        {
-            Combat combat = new Combat(player, goblin, messages);
-            won = combat.StartCombat();
-
-            if (!combat.PlayerRetreated)
-                new Game().EndGame(goblin, won, false, messages);
-        });
-        playerWon = won;
+        FinalFightOutcome result = default;
+        string output = Capture(input, () => result = FinalFight.Run(player, goblin, messages, new ScriptedDie()));
+        outcome = result;
         return output;
+    }
+
+    // The fight from the stats before the first Round on: the encounter before it is covered
+    // by the Dragon's tests.
+    private static void AssertSameTextFromTheStats(string expected, string actual)
+    {
+        expected = expected.Replace("\r\n", "\n").TrimEnd();
+        int start = actual.IndexOf(expected.Split('\n')[0]);
+
+        Assert.AreNotEqual(-1, start, $"The stats before the first Round were not shown:\n{actual}");
+        Assert.AreEqual(expected, actual[start..].TrimEnd());
     }
 
     // Goblin: Strength 10, Agility 5 + 5, Health 6. Round 1: taunt 3, attack hits (1),
     // player fails to dodge (20), damage 7. Player: round 1 hits (1), Goblin dodges (5);
     // round 2 hits (1), no dodge (20), damage 6.
-    private static string PlayWonFight(string language, out bool playerWon)
+    private static string PlayWonFight(string language, out FinalFightOutcome outcome)
     {
         Goblin goblin = new Goblin(new ScriptedDie(10, 5, 6, 3, 1, 20, 7));
         Player player = CreatePlayer(new ScriptedDie(1, 5, 1, 20, 6), 20);
-        return PlayCombat("a\n", player, goblin, GetMessages(language), out playerWon);
+        return PlayFinalFight("a\na\n", player, goblin, GetMessages(language), out outcome);
+    }
+
+    // The player misses (20); the Goblin hits (1), the dodge fails (20) and it deals 8.
+    private static string PlayLostFight(string language, out FinalFightOutcome outcome)
+    {
+        Goblin goblin = new Goblin(new ScriptedDie(10, 5, 6, 1, 20, 8));
+        Player player = CreatePlayer(new ScriptedDie(20), 3);
+        return PlayFinalFight("a\n", player, goblin, GetMessages(language), out outcome);
     }
 
     [TestMethod]
     public void WonFight_PrintsExactText()
     {
-        string output = PlayWonFight("English", out bool playerWon);
+        string output = PlayWonFight("English", out FinalFightOutcome outcome);
 
-        Assert.IsTrue(playerWon);
-        AssertSameText("""
+        Assert.AreEqual(FinalFightOutcome.Won, outcome);
+        AssertSameTextFromTheStats("""
             ===== Combat Stats =====
             --- Player ---
             Name: TestHero
@@ -146,14 +156,10 @@ public class GoblinFinalFightOutputTests
     [TestMethod]
     public void LostFight_PrintsExactText()
     {
-        // The player misses (20); the Goblin hits (1), the dodge fails (20) and it deals 8.
-        Goblin goblin = new Goblin(new ScriptedDie(10, 5, 6, 1, 20, 8));
-        Player player = CreatePlayer(new ScriptedDie(20), 3);
+        string output = PlayLostFight("English", out FinalFightOutcome outcome);
 
-        string output = PlayCombat("", player, goblin, GetMessages("English"), out bool playerWon);
-
-        Assert.IsFalse(playerWon);
-        AssertSameText("""
+        Assert.AreEqual(FinalFightOutcome.Lost, outcome);
+        AssertSameTextFromTheStats("""
             ===== Combat Stats =====
             --- Player ---
             Name: TestHero
@@ -194,9 +200,9 @@ public class GoblinFinalFightOutputTests
         Player player = CreatePlayer(new ScriptedDie(1, 20, 2), 20);
         Messages messages = GetMessages("English");
 
-        string output = PlayCombat("r\n", player, goblin, messages, out bool playerWon);
+        string output = PlayFinalFight("a\nr\n", player, goblin, messages, out FinalFightOutcome outcome);
 
-        Assert.IsFalse(playerWon);
+        Assert.AreEqual(FinalFightOutcome.Retreated, outcome);
         Assert.AreEqual(4, goblin.HealthPoints);
         StringAssert.EndsWith(output.TrimEnd(), string.Join("\n",
             "You hit Gritknuckle.",
@@ -217,11 +223,10 @@ public class GoblinFinalFightOutputTests
     [DataRow("Italian", "Con il goblin sconfitto, il sentiero a ovest torna sicuro. Torni a casa da eroe. Fine.")]
     public void VictoryEnding_PrintsExactText(string language, string expected)
     {
-        Goblin goblin = new Goblin(new ScriptedDie(10, 5, 6));
+        string output = PlayWonFight(language, out FinalFightOutcome outcome);
 
-        string output = Capture("", () => new Game().EndGame(goblin, true, false, GetMessages(language)));
-
-        AssertSameText(expected, output);
+        Assert.AreEqual(FinalFightOutcome.Won, outcome);
+        StringAssert.EndsWith(output.TrimEnd(), "\n" + expected);
     }
 
     [TestMethod]
@@ -231,26 +236,27 @@ public class GoblinFinalFightOutputTests
     [DataRow("Italian", "Il goblin sghignazza e fruga nelle tue tasche mentre la tua vista si spegne. Sei sconfitto. La tua famiglia piange la tua perdita. Fine.")]
     public void DefeatEnding_PrintsExactText(string language, string expected)
     {
-        Goblin goblin = new Goblin(new ScriptedDie(10, 5, 6));
+        string output = PlayLostFight(language, out FinalFightOutcome outcome);
 
-        string output = Capture("", () => new Game().EndGame(goblin, false, false, GetMessages(language)));
-
-        AssertSameText(expected, output);
+        Assert.AreEqual(FinalFightOutcome.Lost, outcome);
+        StringAssert.EndsWith(output.TrimEnd(), "\n" + expected);
     }
 
+    // A retreat at the encounter prompt ends with the retreat text every Monster shares.
     [TestMethod]
-    [DataRow("English")]
-    [DataRow("Spanish")]
-    [DataRow("French")]
-    [DataRow("Italian")]
-    public void RetreatEnding_IsTheSharedRetreatText(string language)
+    [DataRow("English", "Enter choice: You quickly retreat. You come home poor but alive to adventure another day. The End.")]
+    [DataRow("Spanish", "Escribe tu opcion: Te has retirado de la batalla.")]
+    [DataRow("French", "Entrez votre choix : Vous vous etes retire du combat.")]
+    [DataRow("Italian", "Inserisci la tua scelta: Ti ritiri in fretta. Torni a casa povero ma vivo, pronto per una nuova avventura. Fine.")]
+    public void RetreatEnding_IsTheSharedRetreatText(string language, string expected)
     {
-        Messages messages = GetMessages(language);
         Goblin goblin = new Goblin(new ScriptedDie(10, 5, 6));
+        Player player = CreatePlayer(new ScriptedDie(), 20);
 
-        string output = Capture("", () => new Game().EndGame(goblin, false, true, messages));
+        string output = PlayFinalFight("r\n", player, goblin, GetMessages(language), out FinalFightOutcome outcome);
 
-        AssertSameText(messages.GetMessage("retreat"), output);
+        Assert.AreEqual(FinalFightOutcome.Retreated, outcome);
+        StringAssert.EndsWith(output.TrimEnd(), "\n" + expected);
     }
 
     // The whole encounter, from the path narrative to the ending, so every kind of Goblin
@@ -266,13 +272,9 @@ public class GoblinFinalFightOutputTests
         Player player = CreatePlayer(new ScriptedDie(1, 5, 1, 20, 6), 20);
         Messages messages = GetMessages(language);
 
-        string output = Capture("a\na\n", () =>
-        {
-            MethodInfo? method = typeof(Game).GetMethod("HandleEncounter", BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.IsNotNull(method, "The encounter method was not found.");
-            method!.Invoke(new Game(), new object[] { player, goblin, messages });
-        });
+        string output = PlayFinalFight("a\na\n", player, goblin, messages, out FinalFightOutcome outcome);
 
+        Assert.AreEqual(FinalFightOutcome.Won, outcome);
         StringAssert.Contains(output, messages.GetMessage("goblin_victory"));
         Assert.IsFalse(Regex.IsMatch(output, @"\[[a-z0-9_]+\]"), $"Raw message key shown:\n{output}");
         AssertNoDragon(output, language);

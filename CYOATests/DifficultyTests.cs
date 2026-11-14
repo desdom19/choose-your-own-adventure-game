@@ -225,14 +225,19 @@ public class DifficultyCombatTests
         messages.SetCurrentLanguage("English");
         messages.ReadDictionary();
 
-        Console.SetIn(new StringReader("a\n"));
+        // "a" at the encounter prompt, then "a" again after Round 1.
+        Console.SetIn(new StringReader("a\na\n"));
         using StringWriter writer = new StringWriter();
         Console.SetOut(writer);
 
-        bool playerWon = new Combat(player, goblin, messages).StartCombat();
+        FinalFightOutcome outcome = FinalFight.Run(player, goblin, messages, new ScriptedDie());
 
-        Assert.IsTrue(playerWon);
-        Assert.AreEqual("""
+        // The Rounds, from the stats before the first one, come just before the victory ending.
+        Assert.AreEqual(FinalFightOutcome.Won, outcome);
+        string output = writer.ToString().Replace("\r\n", "\n").TrimEnd();
+        string victory = "With the goblin beaten, the west road is safe again. You return home a hero. The End.";
+        StringAssert.EndsWith(output, "\n" + victory);
+        StringAssert.EndsWith(output[..^victory.Length].TrimEnd(), """
             ===== Combat Stats =====
             --- Player ---
             Name: TestHero
@@ -268,6 +273,6 @@ public class DifficultyCombatTests
             You deal 9 damage.
             Gritknuckle's health points are now 0.
             With a last squeal of 'Eeek!', you have defeated the goblin.
-            """, writer.ToString().Replace("\r\n", "\n").TrimEnd());
+            """.Replace("\r\n", "\n"));
     }
 }

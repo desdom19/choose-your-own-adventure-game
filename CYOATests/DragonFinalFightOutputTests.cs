@@ -1,5 +1,4 @@
 using System.IO;
-using System.Reflection;
 
 // Characterization tests: the exact text a Dragon Final Fight prints, in every language.
 // Every Dragon line must stay the same, character for character, in every language.
@@ -74,12 +73,8 @@ public class DragonFinalFightOutputTests
         // Round 3 hits (1), no dodge (20), damage 3. Round 4 hits (1), no dodge (20), damage 4.
         Player player = CreatePlayer(new ScriptedDie(1, 5, 20, 1, 20, 3, 1, 20, 4), 20);
 
-        return Capture("a\na\na\n", () =>
-        {
-            Combat combat = new Combat(player, dragon, messages);
-            bool playerWon = combat.StartCombat();
-            new Game().EndGame(dragon, playerWon, combat.PlayerRetreated, messages);
-        });
+        // "a" at the encounter prompt, then "a" after each of the first three Rounds.
+        return Capture("a\na\na\na\n", player, dragon, messages, FinalFightOutcome.Won);
     }
 
     // The player misses, then the Dragon hits for more than the player's Health Points.
@@ -89,12 +84,7 @@ public class DragonFinalFightOutputTests
         Dragon dragon = new Dragon(new ScriptedDie(10, 10, 5, 1, 20, 12));
         Player player = CreatePlayer(new ScriptedDie(20), 3);
 
-        return Capture("", () =>
-        {
-            Combat combat = new Combat(player, dragon, messages);
-            bool playerWon = combat.StartCombat();
-            new Game().EndGame(dragon, playerWon, combat.PlayerRetreated, messages);
-        });
+        return Capture("a\n", player, dragon, messages, FinalFightOutcome.Lost);
     }
 
     // The encounter on the north path: the player attacks, then retreats after one round.
@@ -104,7 +94,7 @@ public class DragonFinalFightOutputTests
         Dragon dragon = new Dragon(new ScriptedDie(10, 10, 5, 15));
         Player player = CreatePlayer(new ScriptedDie(20), 20);
 
-        return Capture("x\na\nr\n", () => InvokeEncounter(player, dragon, messages));
+        return Capture("x\na\nr\n", player, dragon, messages, FinalFightOutcome.Retreated);
     }
 
     // The encounter on the north path: the player retreats before the fight.
@@ -114,19 +104,32 @@ public class DragonFinalFightOutputTests
         Dragon dragon = new Dragon(new ScriptedDie(7, 8, 9));
         Player player = CreatePlayer(new ScriptedDie(), 20);
 
-        return Capture("r\n", () => InvokeEncounter(player, dragon, messages));
+        return Capture("r\n", player, dragon, messages, FinalFightOutcome.Retreated);
     }
 
-    private static void InvokeEncounter(Player player, Dragon dragon, Messages messages)
+    // Runs the whole Final Fight and checks its outcome, returning everything it printed.
+    private static string Capture(string input, Player player, Dragon dragon, Messages messages, FinalFightOutcome expectedOutcome)
     {
-        MethodInfo? method = typeof(Game).GetMethod("HandleEncounter", BindingFlags.NonPublic | BindingFlags.Instance);
-        Assert.IsNotNull(method, "The encounter method was not found.");
-        method!.Invoke(new Game(), new object[] { player, dragon, messages });
+        FinalFightOutcome outcome = default;
+        string output = Capture(input, () => outcome = FinalFight.Run(player, dragon, messages, new ScriptedDie()));
+        Assert.AreEqual(expectedOutcome, outcome);
+        return output;
     }
 
     private static void AssertSameText(string expected, string actual)
     {
         Assert.AreEqual(expected.Replace("\r\n", "\n").TrimEnd(), actual.TrimEnd());
+    }
+
+    // The fight from the stats before the first Round on: the encounter before it has its
+    // own tests below.
+    private static void AssertSameTextFromTheStats(string expected, string actual)
+    {
+        expected = expected.Replace("\r\n", "\n").TrimEnd();
+        int start = actual.IndexOf(expected.Split('\n')[0]);
+
+        Assert.AreNotEqual(-1, start, $"The stats before the first Round were not shown:\n{actual}");
+        Assert.AreEqual(expected, actual[start..].TrimEnd());
     }
 
     [TestMethod]
@@ -136,7 +139,7 @@ public class DragonFinalFightOutputTests
     [DataRow("Italian")]
     public void WonFight_PrintsExactText(string language)
     {
-        AssertSameText(ExpectedWon[language], PlayWonFight(language));
+        AssertSameTextFromTheStats(ExpectedWon[language], PlayWonFight(language));
     }
 
     [TestMethod]
@@ -146,7 +149,7 @@ public class DragonFinalFightOutputTests
     [DataRow("Italian")]
     public void LostFight_PrintsExactText(string language)
     {
-        AssertSameText(ExpectedLost[language], PlayLostFight(language));
+        AssertSameTextFromTheStats(ExpectedLost[language], PlayLostFight(language));
     }
 
     [TestMethod]
