@@ -9,6 +9,9 @@ public enum FinalFightOutcome
 // to the ending text. Every outcome ends the adventure.
 public static class FinalFight
 {
+    // A Monster wears no Armor.
+    private const int MonsterProtection = 0;
+
     // Every roll in the fight comes from the die passed in: both sides' attack, defense and
     // damage rolls, and the Monster's taunt and reply picks.
     public static FinalFightOutcome Run(Player player, Monster monster, Messages messages, Die die)
@@ -106,10 +109,9 @@ public static class FinalFight
 
         output.Add(player.Weapon.AsciiArt);
 
-        int attackRoll = RollAttack(die);
+        StrikeResult strike = Strike(player.Strength, player.Weapon, monster.Agility, MonsterProtection, die);
 
-        // MISS
-        if (!AttackHits(attackRoll, player.Strength))
+        if (strike.Outcome == StrikeOutcome.Missed)
         {
             output.Add(string.Format(messages.GetMessage("player_missed_monster"), monster.Name));
             return string.Join(Environment.NewLine, output);
@@ -117,10 +119,7 @@ public static class FinalFight
 
         output.Add(string.Format(messages.GetMessage("player_hit_monster"), monster.Name));
 
-        int defenseRoll = die.Roll(20);
-
-        // DEFENSE: a roll of 20 never dodges, so a Monster with Agility 20 can still be hurt.
-        if (defenseRoll < 20 && defenseRoll <= monster.Agility)
+        if (strike.Outcome == StrikeOutcome.Dodged)
         {
             output.Add(string.Format(messages.GetMessage("monster_defended_player_attack"), monster.Name));
             output.Add(string.Format(
@@ -130,14 +129,11 @@ public static class FinalFight
             return string.Join(Environment.NewLine, output);
         }
 
-        // DAMAGE
-        int damage = RollPlayerDamage(player, die);
-        monster.HealthPoints -= damage;
+        monster.HealthPoints -= strike.DamageTaken;
 
-        output.Add(string.Format(messages.GetMessage("player_damage_dealt"), damage));
+        output.Add(string.Format(messages.GetMessage("player_damage_dealt"), strike.DamageTaken));
         output.Add(string.Format(messages.GetMessage("monster_health_now"), monster.Name, monster.HealthPoints));
 
-        // END
         if (monster.HealthPoints <= 0)
             output.Add(messages.GetMessage(monster.DefeatedNarrativeKey));
         else
@@ -162,9 +158,9 @@ public static class FinalFight
         if (!string.IsNullOrWhiteSpace(monster.Weapon.AsciiArt))
             output.Add(monster.Weapon.AsciiArt);
 
-        int attackRoll = RollAttack(die);
+        StrikeResult strike = Strike(monster.Strength, monster.Weapon, player.Agility, player.Protection, die);
 
-        if (!AttackHits(attackRoll, monster.Strength))
+        if (strike.Outcome == StrikeOutcome.Missed)
         {
             output.Add(string.Format(messages.GetMessage("monster_missed_player"), monster.Name, player.Name));
             return string.Join(Environment.NewLine, output);
@@ -172,26 +168,21 @@ public static class FinalFight
 
         output.Add(string.Format(messages.GetMessage("monster_hit_player"), monster.Name, player.Name));
 
-        int defenseRoll = die.Roll(20);
-
-        // A roll of 20 never dodges, so a player with Agility 20 or more can still be hurt.
-        if (defenseRoll < 20 && defenseRoll <= player.Agility)
+        if (strike.Outcome == StrikeOutcome.Dodged)
         {
             output.Add(string.Format(messages.GetMessage("player_defended_monster_attack"), player.Name));
             return string.Join(Environment.NewLine, output);
         }
 
-        int damageRolled = RollMonsterDamage(monster, die);
-        int damageTaken = Math.Max(0, damageRolled - player.Protection);
-        player.HealthPoints -= damageTaken;
+        player.HealthPoints -= strike.DamageTaken;
 
         if (player.HealthPoints < 0)
             player.HealthPoints = 0;
 
-        output.Add(string.Format(messages.GetMessage("monster_damage_dealt"), monster.Name, damageRolled));
+        output.Add(string.Format(messages.GetMessage("monster_damage_dealt"), monster.Name, strike.DamageRolled));
 
         if (player.Armor != null)
-            output.Add(DescribeArmorAbsorption(player.Armor, damageRolled - damageTaken, damageTaken, messages));
+            output.Add(DescribeArmorAbsorption(player.Armor, strike.DamageRolled - strike.DamageTaken, strike.DamageTaken, messages));
 
         output.Add(string.Format(messages.GetMessage("player_health_now"), player.Name, player.HealthPoints));
 
@@ -201,27 +192,33 @@ public static class FinalFight
         return string.Join(Environment.NewLine, output);
     }
 
-    private static int RollAttack(Die die)
+    private enum StrikeOutcome
     {
-        return die.Roll(20);
+        Missed,
+        Dodged,
+        Hit,
     }
 
-    private static bool AttackHits(int attackRoll, int strength)
-    {
-        return attackRoll <= strength;
-    }
+    // DamageRolled and DamageTaken are 0 unless the Strike hit.
+    private readonly record struct StrikeResult(StrikeOutcome Outcome, int DamageRolled, int DamageTaken);
 
-    private static int RollPlayerDamage(Player player, Die die)
+    // The Strike rule for both sides, rolled in this order: the attack roll hits if it's at most
+    // the attacker's Strength; the defense roll dodges if it's at most the defender's Agility,
+    // except that a roll of 20 never dodges; the damage roll is against the weapon's maximum
+    // damage, reduced by the defender's Protection but never below 0.
+    private static StrikeResult Strike(int attackerStrength, Weapon attackerWeapon, int defenderAgility, int defenderProtection, Die die)
     {
-        if (player.Weapon == null)
-            return 0;
+        int attackRoll = die.Roll(20);
+        if (attackRoll > attackerStrength)
+            return new StrikeResult(StrikeOutcome.Missed, 0, 0);
 
-        return die.Roll(player.Weapon.MaxDamage);
-    }
+        int defenseRoll = die.Roll(20);
+        if (defenseRoll < 20 && defenseRoll <= defenderAgility)
+            return new StrikeResult(StrikeOutcome.Dodged, 0, 0);
 
-    private static int RollMonsterDamage(Monster monster, Die die)
-    {
-        return die.Roll(monster.Weapon.MaxDamage);
+        int damageRolled = die.Roll(attackerWeapon.MaxDamage);
+        int damageTaken = Math.Max(0, damageRolled - defenderProtection);
+        return new StrikeResult(StrikeOutcome.Hit, damageRolled, damageTaken);
     }
 
     private static string DescribeArmorAbsorption(Armor armor, int damageAbsorbed, int damageTaken, Messages messages)
