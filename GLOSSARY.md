@@ -24,6 +24,14 @@ _Avoid_: Enemy, boss, creature
 The fight with a Monster that ends the adventure, whether the player wins, loses or retreats.
 _Avoid_: Boss fight, battle
 
+**Round**:
+One cycle of a Final Fight: the player's Strike, then the Monster's Strike, then the player's choice to attack again or retreat.
+_Avoid_: Turn, sequence
+
+**Strike**:
+One side's attack on the other in a Final Fight: an attack roll, then a defense roll, then damage reduced by Protection.
+_Avoid_: Attack sequence, hit
+
 **Dragon**:
 The Monster met on the north path.
 
