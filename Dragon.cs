@@ -40,6 +40,6 @@ public class Dragon : Monster
     public override string VictoryKey => "dragon_victory";
     public override string DefeatKey => "dragon_defeat";
 
-    protected override IReadOnlyList<string> DefenseTauntKeys => _defenseTauntKeys;
-    protected override IReadOnlyList<string> DamageReplyKeys => _damageReplyKeys;
+    public override IReadOnlyList<string> DefenseTauntKeys => _defenseTauntKeys;
+    public override IReadOnlyList<string> DamageReplyKeys => _damageReplyKeys;
 }

@@ -139,20 +139,6 @@ public class DifficultyTests
 
     // --- Every Monster ---
 
-    // Every Difficulty uses exactly three rolls to build a Monster, so the fourth scripted
-    // roll is always the Monster's first attack roll.
-    [TestMethod]
-    [DataRow("Easy")]
-    [DataRow("Normal")]
-    [DataRow("Hard")]
-    public void EveryDifficulty_UsesExactlyThreeRollsToBuildAMonster(string difficultyName)
-    {
-        Difficulty difficulty = DifficultyNamed(difficultyName);
-
-        Assert.AreEqual(7, new Dragon(new ScriptedDie(10, 10, 10, 7), difficulty).RollAttack());
-        Assert.AreEqual(7, new Goblin(new ScriptedDie(10, 10, 10, 7), difficulty).RollAttack());
-    }
-
     // Building a Hard Dragon and an Easy Goblin first must not change the weapons of the
     // Monsters built after them.
     [TestMethod]
@@ -165,7 +151,7 @@ public class DifficultyTests
         Assert.AreEqual(9, new Goblin(new ScriptedDie(10, 10, 10)).Weapon.MaxDamage);
     }
 
-    private static Difficulty DifficultyNamed(string name) => name switch
+    public static Difficulty DifficultyNamed(string name) => name switch
     {
         "Easy" => Difficulty.Easy,
         "Normal" => Difficulty.Normal,
@@ -208,9 +194,9 @@ public class DifficultyCombatTests
         // then hits with an attack roll of 13, the dodge fails (20) and it deals 12, which
         // only a cleaver of 12 can roll. Round 2: the player hits for 9, exactly the
         // Goblin's 9 Health Points.
-        Goblin goblin = new Goblin(new ScriptedDie(10, 5, 6, 1, 13, 20, 12), Difficulty.Hard);
+        Goblin goblin = new Goblin(new ScriptedDie(10, 5, 6), Difficulty.Hard);
         OccupationEquipment equipment = OccupationEquipment.For("Fighter")!;
-        Player player = new Player(new ScriptedDie(1, 13, 1, 20, 9))
+        Player player = new Player
         {
             Name = "TestHero",
             Race = "Elf",
@@ -230,7 +216,7 @@ public class DifficultyCombatTests
         using StringWriter writer = new StringWriter();
         Console.SetOut(writer);
 
-        FinalFightOutcome outcome = FinalFight.Run(player, goblin, messages, new ScriptedDie());
+        FinalFightOutcome outcome = FinalFight.Run(player, goblin, messages, new ScriptedDie(1, 13, 1, 13, 20, 12, 1, 20, 9));
 
         // The Rounds, from the stats before the first one, come just before the victory ending.
         Assert.AreEqual(FinalFightOutcome.Won, outcome);
@@ -274,5 +260,42 @@ public class DifficultyCombatTests
             Gritknuckle's health points are now 0.
             With a last squeal of 'Eeek!', you have defeated the goblin.
             """.Replace("\r\n", "\n"));
+    }
+
+    // Every Difficulty builds a Monster from exactly three rolls on its own Die (a fourth
+    // would throw), and leaves its attack roll as rolled: a roll equal to the Monster's
+    // Strength after Difficulty hits, and one above it misses.
+    [TestMethod]
+    [DataRow("Dragon", "Easy")]
+    [DataRow("Dragon", "Normal")]
+    [DataRow("Dragon", "Hard")]
+    [DataRow("Goblin", "Easy")]
+    [DataRow("Goblin", "Normal")]
+    [DataRow("Goblin", "Hard")]
+    public void EveryDifficulty_LeavesTheMonstersAttackRollAsRolled(string monsterName, string difficultyName)
+    {
+        Difficulty difficulty = DifficultyTests.DifficultyNamed(difficultyName);
+        Func<Monster> createMonster = () => monsterName == "Dragon"
+            ? new Dragon(new ScriptedDie(10, 10, 10), difficulty)
+            : new Goblin(new ScriptedDie(10, 10, 10), difficulty);
+        Player player = new Player
+        {
+            Name = "TestHero",
+            Occupation = "Fighter",
+            Strength = 10,
+            HealthPoints = 30,
+            Weapon = new Weapon("long sword", 12, "-)=====>")
+        };
+        Messages messages = ScriptedFinalFight.GetMessages();
+
+        // The player misses (20) each time. At its Strength the Monster hits, the dodge
+        // fails (20) and it deals 1; one above its Strength it misses.
+        Monster atStrength = createMonster();
+        ScriptedFinalFight.Play("a\nr\n", player, atStrength, messages, [20, atStrength.Strength, 20, 1], out string hitOutput);
+        Monster aboveStrength = createMonster();
+        ScriptedFinalFight.Play("a\nr\n", player, aboveStrength, messages, [20, aboveStrength.Strength + 1], out string missOutput);
+
+        StringAssert.Contains(hitOutput, $"{atStrength.Name} hits TestHero.");
+        StringAssert.Contains(missOutput, $"{aboveStrength.Name} missed TestHero.");
     }
 }

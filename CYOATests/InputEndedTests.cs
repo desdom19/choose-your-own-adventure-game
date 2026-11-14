@@ -50,13 +50,13 @@ public class InputEndedTests
     public void FinalFight_Stops_WhenInputEndsAtTheAttackPrompt()
     {
         // Both sides miss the first round (roll 20 against Strength 1), then the attack prompt is shown.
-        Player player = new Player(new ScriptedDie(20))
+        Player player = new Player
         {
             Strength = 1,
             HealthPoints = 10,
             Weapon = new Weapon("long sword", 12, "-)=====>")
         };
-        Dragon dragon = new Dragon(new ScriptedDie(1, 1, 20, 20)); // Strength 1, Agility 1, Health 20, attack 20
+        Dragon dragon = new Dragon(new ScriptedDie(1, 1, 20)); // Strength 1, Agility 1, Health 20
 
         Messages messages = new Messages();
         messages.ReadDictionary();
@@ -64,6 +64,6 @@ public class InputEndedTests
         // "a" at the encounter prompt, then input ends after the first Round.
         Console.SetIn(new StringReader("a\n"));
 
-        Assert.ThrowsException<EndOfStreamException>(() => FinalFight.Run(player, dragon, messages, new ScriptedDie()));
+        Assert.ThrowsException<EndOfStreamException>(() => FinalFight.Run(player, dragon, messages, new ScriptedDie(20, 20)));
     }
 }

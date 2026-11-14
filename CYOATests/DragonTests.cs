@@ -1,23 +1,17 @@
 using System;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static ScriptedFinalFight;
+
+// The Dragon, and the Dragon's Strike against the player, through short scripted Final Fights.
 [TestClass]
+[DoNotParallelize]
 public class DragonTests
 {
-
-    private Messages GetMessages(string language = "English")
+    // Strength 20, Agility 1, Health Points 20.
+    private static Dragon CreateDragon()
     {
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage(language);
-        messages.ReadDictionary();
-        return messages;
-    }
-
-    // The dragon rolls Strength 20, Agility 1 and Health 20 when created, then its attack
-    // roll hits (1), the player's dodge roll fails (20) and the damage roll is as given.
-    private static Dragon CreateDragonThatHitsFor(int damageRoll)
-    {
-        return new Dragon(new ScriptedDie(20, 1, 20, 1, 20, damageRoll));
+        return new Dragon(new ScriptedDie(20, 1, 20));
     }
 
     private static Player CreateTargetPlayer(Armor? armor, int healthPoints = 30)
@@ -25,10 +19,20 @@ public class DragonTests
         return new Player
         {
             Name = "TestHero",
+            Occupation = "Fighter",
+            Strength = 10,
             Agility = 10,
             HealthPoints = healthPoints,
+            Weapon = new Weapon("long sword", 12, "-)=====>"),
             Armor = armor
         };
+    }
+
+    // One Round: the player misses (20), then the Dragon hits (1), the player's dodge roll
+    // fails (20) and the damage roll is as given. The player retreats if still standing.
+    private static FinalFightOutcome DragonStrikesFor(int damageRoll, Player player, out string output, string language = "English")
+    {
+        return Play("a\nr\n", player, CreateDragon(), GetMessages(language), [20, 1, 20, damageRoll], out output);
     }
 
     [TestMethod]
@@ -49,107 +53,11 @@ public class DragonTests
     }
 
     [TestMethod]
-    public void GetRandomDefenseTaunt_ReturnsExpectedTaunt()
-    {
-        Die die = new Die();
-        Dragon dragon = new Dragon(die);
-        Messages messages = GetMessages();
-
-        string taunt = dragon.GetRandomDefenseTaunt(messages);
-
-        string[] validTaunts =
-        {
-        messages.GetMessage("dragon_defense_taunt_1"),
-        messages.GetMessage("dragon_defense_taunt_2"),
-        messages.GetMessage("dragon_defense_taunt_3"),
-        messages.GetMessage("dragon_defense_taunt_4")
-    };
-
-        CollectionAssert.Contains(validTaunts, taunt);
-    }
-
-    [TestMethod]
-    public void GetRandomDamageReply_ReturnsExpectedReply()
-    {
-        Die die = new Die();
-        Dragon dragon = new Dragon(die);
-        Messages messages = GetMessages();
-
-        string reply = dragon.GetRandomDamageReply(messages);
-
-        string[] validReplies =
-        {
-        messages.GetMessage("dragon_damage_reply_1"),
-        messages.GetMessage("dragon_damage_reply_2"),
-        messages.GetMessage("dragon_damage_reply_3"),
-        messages.GetMessage("dragon_damage_reply_4")
-    };
-
-        CollectionAssert.Contains(validReplies, reply);
-    }
-
-    [TestMethod]
-    public void Attack_ReturnsNonEmptyResultString()
-    {
-        Die die = new Die();
-        Dragon dragon = new Dragon(die);
-
-        Player player = new Player
-        {
-            Name = "TestHero",
-            Agility = 10,
-            HealthPoints = 30
-        };
-
-        string result = dragon.Attack(player, GetMessages());
-
-        Assert.IsFalse(string.IsNullOrWhiteSpace(result));
-    }
-
-    [TestMethod]
-    public void Attack_DoesNotIncreasePlayerHealth()
-    {
-        Die die = new Die();
-        Dragon dragon = new Dragon(die);
-
-        Player player = new Player
-        {
-            Name = "TestHero",
-            Agility = 10,
-            HealthPoints = 30
-        };
-
-        int startingHealth = player.HealthPoints;
-
-        string result = dragon.Attack(player, GetMessages());
-
-        Assert.IsTrue(player.HealthPoints <= startingHealth);
-    }
-
-    [TestMethod]
-    public void Attack_KeepsPlayerHealthNonNegative()
-    {
-        Die die = new Die();
-        Dragon dragon = new Dragon(die);
-
-        Player player = new Player
-        {
-            Name = "TestHero",
-            Agility = 0,
-            HealthPoints = 1
-        };
-
-        string result = dragon.Attack(player, GetMessages());
-
-        Assert.IsTrue(player.HealthPoints >= 0);
-    }
-
-    [TestMethod]
     public void Attack_WithArmor_ReducesDamageByProtection()
     {
         Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
 
-        string result = CreateDragonThatHitsFor(5).Attack(player, GetMessages());
+        DragonStrikesFor(5, player, out string result);
 
         Assert.AreEqual(28, player.HealthPoints);
         StringAssert.Contains(result, "Armor (shadow leathers): 3 damage absorbed, 2 damage taken.");
@@ -161,7 +69,7 @@ public class DragonTests
     {
         Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
 
-        string result = CreateDragonThatHitsFor(3).Attack(player, GetMessages());
+        DragonStrikesFor(3, player, out string result);
 
         Assert.AreEqual(30, player.HealthPoints);
         StringAssert.Contains(result, "Armor (shadow leathers): the whole hit is absorbed, no damage taken!");
@@ -173,7 +81,7 @@ public class DragonTests
     {
         Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
 
-        string result = CreateDragonThatHitsFor(2).Attack(player, GetMessages());
+        DragonStrikesFor(2, player, out string result);
 
         Assert.AreEqual(30, player.HealthPoints);
         StringAssert.Contains(result, "Armor (shadow leathers): the whole hit is absorbed, no damage taken!");
@@ -184,8 +92,9 @@ public class DragonTests
     {
         Player player = CreateTargetPlayer(new Armor("shadow leathers", 3), healthPoints: 2);
 
-        string result = CreateDragonThatHitsFor(5).Attack(player, GetMessages());
+        FinalFightOutcome outcome = DragonStrikesFor(5, player, out string result);
 
+        Assert.AreEqual(FinalFightOutcome.Lost, outcome);
         Assert.AreEqual(0, player.HealthPoints);
         StringAssert.Contains(result, "TestHero has been defeated.");
     }
@@ -195,26 +104,27 @@ public class DragonTests
     {
         Player player = CreateTargetPlayer(armor: null);
 
-        string result = CreateDragonThatHitsFor(5).Attack(player, GetMessages());
+        DragonStrikesFor(5, player, out string result);
 
         Assert.AreEqual(25, player.HealthPoints);
-        string expected = string.Join(Environment.NewLine,
+        StringAssert.Contains(result, Lines(
+            "You missed Smolderfang.",
             "Smolderfang attacks TestHero with claws!",
             "<<< claws >>>",
             "Smolderfang hits TestHero.",
             "Smolderfang deals 5 damage.",
-            "TestHero's health points are now 25.");
-        Assert.AreEqual(expected, result);
+            "TestHero's health points are now 25.",
+            "Enter 'a' to attack or 'r' to retreat."));
     }
 
     [TestMethod]
     public void Attack_WithArmor_SuccessfulDodgeStillDependsOnlyOnAgility()
     {
-        // Attack roll hits (1), then the dodge roll of 10 equals the player's Agility of 10.
-        Dragon dragon = new Dragon(new ScriptedDie(20, 1, 20, 1, 10));
+        // The player misses (20), the Dragon hits (1), then the dodge roll of 10 equals the
+        // player's Agility of 10.
         Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
 
-        string result = dragon.Attack(player, GetMessages());
+        Play("a\nr\n", player, CreateDragon(), GetMessages(), [20, 1, 10], out string result);
 
         Assert.AreEqual(30, player.HealthPoints);
         StringAssert.Contains(result, "TestHero successfully defends the attack.");
@@ -229,7 +139,7 @@ public class DragonTests
     {
         Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
 
-        string result = CreateDragonThatHitsFor(3).Attack(player, GetMessages(language));
+        DragonStrikesFor(3, player, out string result, language);
 
         StringAssert.Contains(result, expected);
     }
@@ -242,7 +152,7 @@ public class DragonTests
     {
         Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
 
-        string result = CreateDragonThatHitsFor(5).Attack(player, GetMessages(language));
+        DragonStrikesFor(5, player, out string result, language);
 
         StringAssert.Contains(result, expected);
     }
@@ -273,7 +183,7 @@ public class GamePbi18Tests
     }
 
     [TestMethod]
-    public void DragonDisplayStats_UsesLocalizedLabels()
+    public void DragonStats_UseLocalizedLabels()
     {
         Die die = new Die();
         Dragon dragon = new Dragon(die);
@@ -282,12 +192,8 @@ public class GamePbi18Tests
         messages.SetCurrentLanguage("English");
         messages.ReadDictionary();
 
-        using StringWriter writer = new StringWriter();
-        Console.SetOut(writer);
-
-        dragon.DisplayStats(messages);
-
-        string output = writer.ToString();
+        // The Dragon's stats are shown when the player meets it, so a retreat rolls no dice.
+        Play("r\n", new Player(), dragon, messages, [], out string output);
 
         StringAssert.Contains(output, messages.GetMessage("dragon_stats_header"));
         StringAssert.Contains(output, messages.GetMessage("stats_name"));

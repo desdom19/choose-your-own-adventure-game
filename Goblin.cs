@@ -45,6 +45,6 @@ public class Goblin : Monster
     public override string VictoryKey => "goblin_victory";
     public override string DefeatKey => "goblin_defeat";
 
-    protected override IReadOnlyList<string> DefenseTauntKeys => _defenseTauntKeys;
-    protected override IReadOnlyList<string> DamageReplyKeys => _damageReplyKeys;
+    public override IReadOnlyList<string> DefenseTauntKeys => _defenseTauntKeys;
+    public override IReadOnlyList<string> DamageReplyKeys => _damageReplyKeys;
 }

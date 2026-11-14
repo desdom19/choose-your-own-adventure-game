@@ -33,9 +33,10 @@ public class FinalFightTests
         return messages;
     }
 
-    private static Player CreatePlayer(Die die, int healthPoints)
+    // The player's own Die is empty: every roll in a Final Fight comes from the Die given to Run.
+    private static Player CreatePlayer(int healthPoints)
     {
-        return new Player(die)
+        return new Player(new ScriptedDie())
         {
             Name = "TestHero",
             Race = "Elf",
@@ -47,19 +48,20 @@ public class FinalFightTests
         };
     }
 
-    // Strength 10, Agility 5 + 5, Health Points 6, then the given fight rolls.
-    private static Goblin CreateGoblin(params int[] fightRolls)
+    // Strength 10, Agility 5 + 5, Health Points 6. Its Die has no rolls left for the fight.
+    private static Goblin CreateGoblin()
     {
-        return new Goblin(new ScriptedDie(new[] { 10, 5, 6 }.Concat(fightRolls).ToArray()));
+        return new Goblin(new ScriptedDie(10, 5, 6));
     }
 
-    private static FinalFightOutcome Run(string input, Player player, Monster monster, out string output)
+    // Runs a Final Fight whose rolls, in fight order, all come from the one Die given to Run.
+    private static FinalFightOutcome Run(string input, Player player, Monster monster, int[] rolls, out string output)
     {
         Console.SetIn(new StringReader(input));
         using StringWriter writer = new StringWriter();
         Console.SetOut(writer);
 
-        FinalFightOutcome outcome = FinalFight.Run(player, monster, GetMessages(), new ScriptedDie());
+        FinalFightOutcome outcome = FinalFight.Run(player, monster, GetMessages(), new ScriptedDie(rolls));
 
         output = writer.ToString().Replace("\r\n", "\n").TrimEnd();
         return outcome;
@@ -68,8 +70,8 @@ public class FinalFightTests
     [TestMethod]
     public void RetreatAtTheEncounterPrompt_ReturnsRetreated_WithNoDiceRolled()
     {
-        // Every Die is empty after the Goblin's stats, so any roll would throw.
-        FinalFightOutcome outcome = Run("r\n", CreatePlayer(new ScriptedDie(), 20), CreateGoblin(), out string output);
+        // The Die is empty, so any roll would throw.
+        FinalFightOutcome outcome = Run("r\n", CreatePlayer(20), CreateGoblin(), [], out string output);
 
         Assert.AreEqual(FinalFightOutcome.Retreated, outcome);
         StringAssert.EndsWith(output, "You quickly retreat. You come home poor but alive to adventure another day. The End.");
@@ -81,7 +83,7 @@ public class FinalFightTests
         // The player hits (1), the Goblin fails to dodge (20) and takes 6, all its Health Points.
         Goblin goblin = CreateGoblin();
 
-        FinalFightOutcome outcome = Run("a\n", CreatePlayer(new ScriptedDie(1, 20, 6), 20), goblin, out string output);
+        FinalFightOutcome outcome = Run("a\n", CreatePlayer(20), goblin, [1, 20, 6], out string output);
 
         Assert.AreEqual(FinalFightOutcome.Won, outcome);
         Assert.AreEqual(0, goblin.HealthPoints);
@@ -94,9 +96,9 @@ public class FinalFightTests
     public void MonsterBringsThePlayerToZero_ReturnsLost_WithTheDefeatEnding()
     {
         // The player misses (20); the Goblin hits (1), the dodge fails (20) and it deals 9.
-        Player player = CreatePlayer(new ScriptedDie(20), 3);
+        Player player = CreatePlayer(3);
 
-        FinalFightOutcome outcome = Run("a\n", player, CreateGoblin(1, 20, 9), out string output);
+        FinalFightOutcome outcome = Run("a\n", player, CreateGoblin(), [20, 1, 20, 9], out string output);
 
         Assert.AreEqual(FinalFightOutcome.Lost, outcome);
         Assert.AreEqual(0, player.HealthPoints);
@@ -108,7 +110,7 @@ public class FinalFightTests
     [TestMethod]
     public void StatsBeforeTheFirstRound_ShowBothSides_WithProtectionZeroWithoutArmor()
     {
-        FinalFightOutcome outcome = Run("a\nr\n", CreatePlayer(new ScriptedDie(20), 20), CreateGoblin(15), out string output);
+        FinalFightOutcome outcome = Run("a\nr\n", CreatePlayer(20), CreateGoblin(), [20, 15], out string output);
 
         Assert.AreEqual(FinalFightOutcome.Retreated, outcome);
         StringAssert.Contains(output, string.Join("\n",
@@ -136,7 +138,7 @@ public class FinalFightTests
     public void RetreatBetweenRounds_ReturnsRetreated_WithTheMidFightRetreatTextOnly()
     {
         // One Round where both sides miss (20 and 15), then a retreat.
-        FinalFightOutcome outcome = Run("a\nr\n", CreatePlayer(new ScriptedDie(20), 20), CreateGoblin(15), out string output);
+        FinalFightOutcome outcome = Run("a\nr\n", CreatePlayer(20), CreateGoblin(), [20, 15], out string output);
 
         Assert.AreEqual(FinalFightOutcome.Retreated, outcome);
         StringAssert.EndsWith(output, string.Join("\n",
@@ -149,7 +151,7 @@ public class FinalFightTests
     [TestMethod]
     public void InvalidAnswerAtTheEncounterPrompt_AsksAgain()
     {
-        FinalFightOutcome outcome = Run("x\nr\n", CreatePlayer(new ScriptedDie(), 20), CreateGoblin(), out string output);
+        FinalFightOutcome outcome = Run("x\nr\n", CreatePlayer(20), CreateGoblin(), [], out string output);
 
         Assert.AreEqual(FinalFightOutcome.Retreated, outcome);
         StringAssert.EndsWith(output, string.Join("\n",
@@ -163,10 +165,7 @@ public class FinalFightTests
     public void InvalidAnswerBetweenRounds_AsksAgainWithoutPlayingARound()
     {
         // One Round where both sides miss (20 and 15), then "x", then a retreat.
-        Goblin goblin = CreateGoblin(15);
-        Player player = CreatePlayer(new ScriptedDie(20), 20);
-
-        FinalFightOutcome outcome = Run("a\nx\nr\n", player, goblin, out string output);
+        FinalFightOutcome outcome = Run("a\nx\nr\n", CreatePlayer(20), CreateGoblin(), [20, 15], out string output);
 
         Assert.AreEqual(FinalFightOutcome.Retreated, outcome);
         StringAssert.EndsWith(output, string.Join("\n",
@@ -175,5 +174,23 @@ public class FinalFightTests
             "Invalid choice. Please try again.",
             "Enter 'a' to attack or 'r' to retreat.",
             "You hastily retreat licking your wounds."));
+    }
+
+    [TestMethod]
+    public void EveryRoll_ComesFromTheDieGivenToRun_InFightOrder()
+    {
+        // Round 1: the player hits (1), the Goblin dodges (5) and picks taunt 3; the Goblin
+        // hits (1), the dodge fails (20) and it deals 4. Round 2: the player hits (1), no dodge
+        // (20), deals 2, and the Goblin picks reply 2; the Goblin misses (15). Then a retreat.
+        Goblin goblin = CreateGoblin();
+        Player player = CreatePlayer(20);
+
+        FinalFightOutcome outcome = Run("a\na\nr\n", player, goblin, [1, 5, 3, 1, 20, 4, 1, 20, 2, 2, 15], out string output);
+
+        Assert.AreEqual(FinalFightOutcome.Retreated, outcome);
+        Assert.AreEqual(16, player.HealthPoints);
+        Assert.AreEqual(4, goblin.HealthPoints);
+        StringAssert.Contains(output, "Over here, Elf! No, over here! Hee hee!");
+        StringAssert.Contains(output, "You'll pay for that, you big lump!");
     }
 }

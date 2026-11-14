@@ -109,11 +109,11 @@ public class MerchantTests
         player.DisplayStats(messages);
 
         // A Final Fight shows both sides' stats once the player attacks. With Strength 0 the
-        // player misses, the Dragon misses (20), and with 0 Health Points the fight is lost.
+        // player misses (20), the Dragon misses (20), and with 0 Health Points the fight is lost.
         StringWriter combatStats = new StringWriter();
         Console.SetIn(new StringReader("a\n"));
         Console.SetOut(combatStats);
-        FinalFightOutcome outcome = FinalFight.Run(player, new Dragon(new ScriptedDie(10, 10, 10, 20)), messages, new ScriptedDie());
+        FinalFightOutcome outcome = FinalFight.Run(player, new Dragon(new ScriptedDie(10, 10, 10)), messages, new ScriptedDie(20, 20));
         Assert.AreEqual(FinalFightOutcome.Lost, outcome);
 
         foreach (string shown in new[] { summary.ToString(), combatStats.ToString() })

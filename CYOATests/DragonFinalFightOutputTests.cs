@@ -34,9 +34,9 @@ public class DragonFinalFightOutputTests
         return messages;
     }
 
-    private static Player CreatePlayer(Die die, int healthPoints)
+    private static Player CreatePlayer(int healthPoints)
     {
-        return new Player(die)
+        return new Player
         {
             Name = "TestHero",
             Race = "Elf",
@@ -64,37 +64,40 @@ public class DragonFinalFightOutputTests
     {
         Messages messages = GetMessages(language);
 
-        // Dragon: Strength 10, Agility 10, Health 5. Round 1: taunt 3, attack misses (15).
-        // Round 2: attack hits (1), player dodges (1). Round 3: reply 2, attack hits (1),
-        // player fails to dodge (20), damage 5.
-        Dragon dragon = new Dragon(new ScriptedDie(10, 10, 5, 3, 15, 1, 1, 2, 1, 20, 5));
+        // Dragon: Strength 10, Agility 10, Health 5.
+        Dragon dragon = new Dragon(new ScriptedDie(10, 10, 5));
+        Player player = CreatePlayer(20);
 
-        // Player: round 1 hits (1), Dragon dodges (5). Round 2 misses (20).
-        // Round 3 hits (1), no dodge (20), damage 3. Round 4 hits (1), no dodge (20), damage 4.
-        Player player = CreatePlayer(new ScriptedDie(1, 5, 20, 1, 20, 3, 1, 20, 4), 20);
+        // Round 1: the player hits (1), the Dragon dodges (5) and taunts (3); its attack misses (15).
+        // Round 2: the player misses (20); the Dragon hits (1) and the player dodges (1).
+        // Round 3: the player hits (1), no dodge (20), damage 3, reply 2; the Dragon hits (1),
+        // the player fails to dodge (20), damage 5.
+        // Round 4: the player hits (1), no dodge (20), damage 4.
+        int[] rolls = [1, 5, 3, 15, 20, 1, 1, 1, 20, 3, 2, 1, 20, 5, 1, 20, 4];
 
         // "a" at the encounter prompt, then "a" after each of the first three Rounds.
-        return Capture("a\na\na\na\n", player, dragon, messages, FinalFightOutcome.Won);
+        return Capture("a\na\na\na\n", player, dragon, messages, rolls, FinalFightOutcome.Won);
     }
 
     // The player misses, then the Dragon hits for more than the player's Health Points.
     private static string PlayLostFight(string language)
     {
         Messages messages = GetMessages(language);
-        Dragon dragon = new Dragon(new ScriptedDie(10, 10, 5, 1, 20, 12));
-        Player player = CreatePlayer(new ScriptedDie(20), 3);
+        Dragon dragon = new Dragon(new ScriptedDie(10, 10, 5));
+        Player player = CreatePlayer(3);
 
-        return Capture("a\n", player, dragon, messages, FinalFightOutcome.Lost);
+        return Capture("a\n", player, dragon, messages, [20, 1, 20, 12], FinalFightOutcome.Lost);
     }
 
     // The encounter on the north path: the player attacks, then retreats after one round.
     private static string PlayEncounterThenRetreatMidFight(string language)
     {
         Messages messages = GetMessages(language);
-        Dragon dragon = new Dragon(new ScriptedDie(10, 10, 5, 15));
-        Player player = CreatePlayer(new ScriptedDie(20), 20);
+        Dragon dragon = new Dragon(new ScriptedDie(10, 10, 5));
+        Player player = CreatePlayer(20);
 
-        return Capture("x\na\nr\n", player, dragon, messages, FinalFightOutcome.Retreated);
+        // Both sides miss (20 and 15).
+        return Capture("x\na\nr\n", player, dragon, messages, [20, 15], FinalFightOutcome.Retreated);
     }
 
     // The encounter on the north path: the player retreats before the fight.
@@ -102,16 +105,17 @@ public class DragonFinalFightOutputTests
     {
         Messages messages = GetMessages(language);
         Dragon dragon = new Dragon(new ScriptedDie(7, 8, 9));
-        Player player = CreatePlayer(new ScriptedDie(), 20);
+        Player player = CreatePlayer(20);
 
-        return Capture("r\n", player, dragon, messages, FinalFightOutcome.Retreated);
+        return Capture("r\n", player, dragon, messages, [], FinalFightOutcome.Retreated);
     }
 
-    // Runs the whole Final Fight and checks its outcome, returning everything it printed.
-    private static string Capture(string input, Player player, Dragon dragon, Messages messages, FinalFightOutcome expectedOutcome)
+    // Runs the whole Final Fight, with every roll in fight order on the one Die given to Run,
+    // and checks its outcome, returning everything it printed.
+    private static string Capture(string input, Player player, Dragon dragon, Messages messages, int[] rolls, FinalFightOutcome expectedOutcome)
     {
         FinalFightOutcome outcome = default;
-        string output = Capture(input, () => outcome = FinalFight.Run(player, dragon, messages, new ScriptedDie()));
+        string output = Capture(input, () => outcome = FinalFight.Run(player, dragon, messages, new ScriptedDie(rolls)));
         Assert.AreEqual(expectedOutcome, outcome);
         return output;
     }

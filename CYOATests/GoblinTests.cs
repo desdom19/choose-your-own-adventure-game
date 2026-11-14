@@ -1,15 +1,10 @@
+using static ScriptedFinalFight;
+
 // The Goblin: a slippery Monster that dodges more often than the Dragon but hurts less.
 [TestClass]
+[DoNotParallelize]
 public class GoblinTests
 {
-    private static Messages GetMessages(string language = "English")
-    {
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage(language);
-        messages.ReadDictionary();
-        return messages;
-    }
-
     [TestMethod]
     public void NewGoblin_LowestRolls_GiveAgilitySix()
     {
@@ -66,20 +61,51 @@ public class GoblinTests
         Assert.AreEqual(expected, GetMessages(language).TranslateWeaponForDisplay("rusty cleaver"));
     }
 
+    // Strength 10, Agility 5 + 5, Health Points 10.
+    private static Goblin CreateGoblin()
+    {
+        return new Goblin(new ScriptedDie(10, 5, 10));
+    }
+
+    // A Thief with Strength 10, so an attack roll of 20 always misses.
+    private static Player CreatePlayer(Armor? armor = null, int healthPoints = 30, string race = "Human")
+    {
+        return new Player
+        {
+            Name = "TestHero",
+            Race = race,
+            Occupation = "Thief",
+            Strength = 10,
+            Agility = 10,
+            HealthPoints = healthPoints,
+            Weapon = new Weapon("dagger", 6, "--|=>"),
+            Armor = armor
+        };
+    }
+
+    // One Round in which the player misses (20), then the Goblin strikes with the given rolls:
+    // its attack roll, the player's dodge roll and the damage roll. The player retreats if
+    // still standing.
+    private static FinalFightOutcome GoblinStrikes(Player player, out string output, params int[] strikeRolls)
+    {
+        return Play("a\nr\n", player, CreateGoblin(), GetMessages(), [20, .. strikeRolls], out output);
+    }
+
     [TestMethod]
     [DataRow(1, "Too slow! Too slow!")]
     [DataRow(2, "Ha! You swing like a sleepy troll!")]
-    [DataRow(3, "Over here, {0}! No, over here! Hee hee!")]
+    [DataRow(3, "Over here, Dwarf! No, over here! Hee hee!")]
     [DataRow(4, "Can't hit what you can't catch!")]
-    public void GetRandomDefenseTaunt_PicksFromTheGoblinsOwnTaunts(int roll, string expected)
+    public void GoblinDodges_PicksFromTheGoblinsOwnTaunts(int roll, string expected)
     {
-        Goblin goblin = new Goblin(new ScriptedDie(10, 10, 10, roll));
+        // The player hits (1), the Goblin dodges (10) and picks a taunt; then it misses (11).
         Messages messages = GetMessages();
 
-        string taunt = goblin.GetRandomDefenseTaunt(messages);
+        Play("a\nr\n", CreatePlayer(race: "Dwarf"), CreateGoblin(), messages, [1, 10, roll, 11], out string output);
 
-        Assert.AreEqual(expected, taunt);
-        CollectionAssert.DoesNotContain(TextsForKeys(messages, "dragon_defense_taunt_", 4), taunt);
+        StringAssert.Contains(output, Lines("Gritknuckle successfully defends your attack.", expected, "Gritknuckle attacks TestHero with rusty cleaver!"));
+        foreach (string dragonTaunt in TextsForKeys(messages, "dragon_defense_taunt_", 4))
+            Assert.IsFalse(output.Contains(string.Format(dragonTaunt, "Dwarf")), $"Dragon taunt shown: {dragonTaunt}");
     }
 
     [TestMethod]
@@ -87,88 +113,77 @@ public class GoblinTests
     [DataRow(2, "You'll pay for that, you big lump!")]
     [DataRow(3, "Yowch! That's going to leave a mark!")]
     [DataRow(4, "Lucky hit! Won't happen twice!")]
-    public void GetRandomDamageReply_PicksFromTheGoblinsOwnReplies(int roll, string expected)
+    public void GoblinTakesDamage_PicksFromTheGoblinsOwnReplies(int roll, string expected)
     {
-        Goblin goblin = new Goblin(new ScriptedDie(10, 10, 10, roll));
+        // The player hits (1), the dodge fails (20), 2 damage, then a reply; the Goblin misses (11).
         Messages messages = GetMessages();
 
-        string reply = goblin.GetRandomDamageReply(messages);
+        Play("a\nr\n", CreatePlayer(), CreateGoblin(), messages, [1, 20, 2, roll, 11], out string output);
 
-        Assert.AreEqual(expected, reply);
-        CollectionAssert.DoesNotContain(TextsForKeys(messages, "dragon_damage_reply_", 4), reply);
-    }
-
-    // The Goblin rolls Strength 10, Agility 5 + 5 and Health 10 when created; the rolls
-    // that follow are its attack roll, the player's dodge roll and the damage roll.
-    private static Goblin CreateGoblin(params int[] attackRolls)
-    {
-        return new Goblin(new ScriptedDie(new[] { 10, 5, 10 }.Concat(attackRolls).ToArray()));
-    }
-
-    private static Player CreateTargetPlayer(Armor? armor = null, int healthPoints = 30)
-    {
-        return new Player
-        {
-            Name = "TestHero",
-            Agility = 10,
-            HealthPoints = healthPoints,
-            Armor = armor
-        };
+        StringAssert.Contains(output, Lines("Gritknuckle's health points are now 8.", expected, "Gritknuckle attacks TestHero with rusty cleaver!"));
+        foreach (string dragonReply in TextsForKeys(messages, "dragon_damage_reply_", 4))
+            Assert.IsFalse(output.Contains(dragonReply), $"Dragon reply shown: {dragonReply}");
     }
 
     [TestMethod]
     public void Attack_Hit_PrintsExactText()
     {
-        Player player = CreateTargetPlayer();
+        Player player = CreatePlayer();
 
-        string result = CreateGoblin(1, 20, 6).Attack(player, GetMessages());
+        GoblinStrikes(player, out string result, 1, 20, 6);
 
         Assert.AreEqual(24, player.HealthPoints);
-        Assert.AreEqual(string.Join(Environment.NewLine,
+        StringAssert.Contains(result, Lines(
+            "You missed Gritknuckle.",
             "Gritknuckle attacks TestHero with rusty cleaver!",
             "|=[####]",
             "Gritknuckle hits TestHero.",
             "Gritknuckle deals 6 damage.",
-            "TestHero's health points are now 24."), result);
+            "TestHero's health points are now 24.",
+            "Enter 'a' to attack or 'r' to retreat."));
     }
 
     [TestMethod]
     public void Attack_Miss_PrintsExactText()
     {
-        Player player = CreateTargetPlayer();
+        Player player = CreatePlayer();
 
         // An attack roll of 11 is above the Goblin's Strength of 10.
-        string result = CreateGoblin(11).Attack(player, GetMessages());
+        GoblinStrikes(player, out string result, 11);
 
         Assert.AreEqual(30, player.HealthPoints);
-        Assert.AreEqual(string.Join(Environment.NewLine,
+        StringAssert.Contains(result, Lines(
+            "You missed Gritknuckle.",
             "Gritknuckle attacks TestHero with rusty cleaver!",
             "|=[####]",
-            "Gritknuckle missed TestHero."), result);
+            "Gritknuckle missed TestHero.",
+            "Enter 'a' to attack or 'r' to retreat."));
     }
 
     [TestMethod]
     public void Attack_PlayerDodges_PrintsExactText()
     {
-        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
+        Player player = CreatePlayer(new Armor("shadow leathers", 3));
 
         // The dodge roll of 10 equals the player's Agility of 10.
-        string result = CreateGoblin(1, 10).Attack(player, GetMessages());
+        GoblinStrikes(player, out string result, 1, 10);
 
         Assert.AreEqual(30, player.HealthPoints);
-        Assert.AreEqual(string.Join(Environment.NewLine,
+        StringAssert.Contains(result, Lines(
+            "You missed Gritknuckle.",
             "Gritknuckle attacks TestHero with rusty cleaver!",
             "|=[####]",
             "Gritknuckle hits TestHero.",
-            "TestHero successfully defends the attack."), result);
+            "TestHero successfully defends the attack.",
+            "Enter 'a' to attack or 'r' to retreat."));
     }
 
     [TestMethod]
     public void Attack_WithArmor_PartialHit_ReducesDamageByProtection()
     {
-        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
+        Player player = CreatePlayer(new Armor("shadow leathers", 3));
 
-        string result = CreateGoblin(1, 20, 8).Attack(player, GetMessages());
+        GoblinStrikes(player, out string result, 1, 20, 8);
 
         Assert.AreEqual(25, player.HealthPoints);
         StringAssert.Contains(result, "Gritknuckle deals 8 damage.");
@@ -179,9 +194,9 @@ public class GoblinTests
     [TestMethod]
     public void Attack_WithArmor_WholeHit_IsAbsorbed()
     {
-        Player player = CreateTargetPlayer(new Armor("shadow leathers", 3));
+        Player player = CreatePlayer(new Armor("shadow leathers", 3));
 
-        string result = CreateGoblin(1, 20, 2).Attack(player, GetMessages());
+        GoblinStrikes(player, out string result, 1, 20, 2);
 
         Assert.AreEqual(30, player.HealthPoints);
         StringAssert.Contains(result, "Armor (shadow leathers): the whole hit is absorbed, no damage taken!");
@@ -191,10 +206,11 @@ public class GoblinTests
     [TestMethod]
     public void Attack_HealthPointsNeverDropBelowZero()
     {
-        Player player = CreateTargetPlayer(healthPoints: 3);
+        Player player = CreatePlayer(healthPoints: 3);
 
-        string result = CreateGoblin(1, 20, 8).Attack(player, GetMessages());
+        FinalFightOutcome outcome = GoblinStrikes(player, out string result, 1, 20, 8);
 
+        Assert.AreEqual(FinalFightOutcome.Lost, outcome);
         Assert.AreEqual(0, player.HealthPoints);
         StringAssert.Contains(result, "TestHero's health points are now 0.");
         StringAssert.Contains(result, "TestHero has been defeated.");
@@ -204,41 +220,31 @@ public class GoblinTests
     public void PlayerAttack_GoblinDodges_TauntsWithThePlayersRace()
     {
         // The Goblin's Agility is 5 + 5 = 10; it dodges a roll of 10 and picks taunt 3.
-        Goblin goblin = CreateGoblin(3);
-        Player player = new Player(new ScriptedDie(1, 10))
-        {
-            Race = "Dwarf",
-            Occupation = "Thief",
-            Strength = 15,
-            Weapon = new Weapon("dagger", 6, "--|=>")
-        };
+        // Then it misses (11).
+        Goblin goblin = CreateGoblin();
+        Player player = CreatePlayer(race: "Dwarf");
 
-        string result = player.Attack(goblin, GetMessages());
+        Play("a\nr\n", player, goblin, GetMessages(), [1, 10, 3, 11], out string result);
 
         Assert.AreEqual(10, goblin.HealthPoints);
-        Assert.AreEqual(string.Join(Environment.NewLine,
+        StringAssert.Contains(result, Lines(
             "As a Thief, you withdraw your dagger and attack the goblin.",
             "--|=>",
             "You hit Gritknuckle.",
             "Gritknuckle successfully defends your attack.",
-            "Over here, Dwarf! No, over here! Hee hee!"), result);
+            "Over here, Dwarf! No, over here! Hee hee!",
+            "Gritknuckle attacks TestHero with rusty cleaver!"));
     }
 
     [TestMethod]
     public void PlayerAttack_DefenseRollOfTwenty_LandsEvenAgainstAgilityTwenty()
     {
         // The Goblin rolls its highest Agility, 5 + 15 = 20. A defense roll of 20 never
-        // dodges, so a fight against it can always be won.
-        Goblin goblin = new Goblin(new ScriptedDie(10, 15, 10, 1));
-        Player player = new Player(new ScriptedDie(1, 20, 4))
-        {
-            Race = "Human",
-            Occupation = "Thief",
-            Strength = 15,
-            Weapon = new Weapon("dagger", 6, "--|=>")
-        };
+        // dodges, so a fight against it can always be won. The player hits (1) for 4, the
+        // Goblin replies (1), then misses (11).
+        Goblin goblin = new Goblin(new ScriptedDie(10, 15, 10));
 
-        string result = player.Attack(goblin, GetMessages());
+        Play("a\nr\n", CreatePlayer(), goblin, GetMessages(), [1, 20, 4, 1, 11], out string result);
 
         Assert.AreEqual(6, goblin.HealthPoints);
         StringAssert.Contains(result, "Gritknuckle's health points are now 6.");
@@ -248,10 +254,10 @@ public class GoblinTests
     public void Attack_DefenseRollOfTwenty_LandsEvenAgainstPlayerAgilityAboveTwenty()
     {
         // An Elf can reach Agility 24. A defense roll of 20 still never dodges.
-        Player player = CreateTargetPlayer();
+        Player player = CreatePlayer();
         player.Agility = 24;
 
-        string result = CreateGoblin(1, 20, 6).Attack(player, GetMessages());
+        GoblinStrikes(player, out string result, 1, 20, 6);
 
         Assert.AreEqual(24, player.HealthPoints);
         StringAssert.Contains(result, "Gritknuckle deals 6 damage.");
