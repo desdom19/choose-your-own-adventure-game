@@ -230,7 +230,7 @@ public class DragonFinalFightOutputTests
         -)=====>
         You hit Smolderfang.
         You deal 4 damage.
-        Smolderfang's health points are now -2.
+        Smolderfang's health points are now 0.
         With the last words of 'Arggg!', you have defeated the dragon.
         With the dragon vanquished, you collect the horde of gold, return home, rich and famous. The End.
         """,
@@ -286,7 +286,7 @@ public class DragonFinalFightOutputTests
         -)=====>
         Golpeaste a Smolderfang.
         Haces 4 de dano.
-        Los puntos de vida de Smolderfang ahora son -2.
+        Los puntos de vida de Smolderfang ahora son 0.
         Con las ultimas palabras de 'Arggg!', has derrotado al dragon.
         Con el dragon vencido, recoges el tesoro de oro y regresas a casa, rico y famoso. Fin.
         """,
@@ -342,7 +342,7 @@ public class DragonFinalFightOutputTests
         -)=====>
         Vous avez touche Smolderfang.
         Vous infligez 4 degats.
-        Les points de vie de Smolderfang sont maintenant de -2.
+        Les points de vie de Smolderfang sont maintenant de 0.
         Avec les derniers mots 'Arggg!', vous avez vaincu le dragon.
         Le dragon vaincu, vous recuperez le tresor d'or et rentrez chez vous, riche et celebre. Fin.
         """,
@@ -398,7 +398,7 @@ public class DragonFinalFightOutputTests
         -)=====>
         Hai colpito Smolderfang.
         Danni inflitti: 4.
-        I punti vita di Smolderfang ora sono -2.
+        I punti vita di Smolderfang ora sono 0.
         Con le ultime parole 'Arggg!', il drago cade sconfitto.
         Con il drago sconfitto, raccogli il tesoro d'oro e torni a casa ricco e famoso. Fine.
         """,

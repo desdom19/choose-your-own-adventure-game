@@ -109,7 +109,7 @@ public static class FinalFight
 
         output.Add(player.Weapon.AsciiArt);
 
-        StrikeResult strike = Strike(player.Strength, player.Weapon, monster.Agility, MonsterProtection, die);
+        StrikeResult strike = Strike(player.Strength, player.Weapon, monster.Agility, MonsterProtection, monster.HealthPoints, die);
 
         if (strike.Outcome == StrikeOutcome.Missed)
         {
@@ -129,7 +129,7 @@ public static class FinalFight
             return string.Join(Environment.NewLine, output);
         }
 
-        monster.HealthPoints -= strike.DamageTaken;
+        monster.HealthPoints = strike.DefenderHealthPoints;
 
         output.Add(string.Format(messages.GetMessage("player_damage_dealt"), strike.DamageTaken));
         output.Add(string.Format(messages.GetMessage("monster_health_now"), monster.Name, monster.HealthPoints));
@@ -142,8 +142,7 @@ public static class FinalFight
         return string.Join(Environment.NewLine, output);
     }
 
-    // The Monster's Strike against the player. The player's Armor absorbs part of a hit, and
-    // the player's Health Points stop at 0.
+    // The Monster's Strike against the player. The player's Armor absorbs part of a hit.
     private static string MonsterStrike(Monster monster, Player player, Messages messages, Die die)
     {
         var output = new List<string>();
@@ -158,7 +157,7 @@ public static class FinalFight
         if (!string.IsNullOrWhiteSpace(monster.Weapon.AsciiArt))
             output.Add(monster.Weapon.AsciiArt);
 
-        StrikeResult strike = Strike(monster.Strength, monster.Weapon, player.Agility, player.Protection, die);
+        StrikeResult strike = Strike(monster.Strength, monster.Weapon, player.Agility, player.Protection, player.HealthPoints, die);
 
         if (strike.Outcome == StrikeOutcome.Missed)
         {
@@ -174,10 +173,7 @@ public static class FinalFight
             return string.Join(Environment.NewLine, output);
         }
 
-        player.HealthPoints -= strike.DamageTaken;
-
-        if (player.HealthPoints < 0)
-            player.HealthPoints = 0;
+        player.HealthPoints = strike.DefenderHealthPoints;
 
         output.Add(string.Format(messages.GetMessage("monster_damage_dealt"), monster.Name, strike.DamageRolled));
 
@@ -199,26 +195,29 @@ public static class FinalFight
         Hit,
     }
 
-    // DamageRolled and DamageTaken are 0 unless the Strike hit.
-    private readonly record struct StrikeResult(StrikeOutcome Outcome, int DamageRolled, int DamageTaken);
+    // DamageRolled and DamageTaken are 0 unless the Strike hit. DefenderHealthPoints is what
+    // the defender has left after the Strike.
+    private readonly record struct StrikeResult(StrikeOutcome Outcome, int DamageRolled, int DamageTaken, int DefenderHealthPoints);
 
     // The Strike rule for both sides, rolled in this order: the attack roll hits if it's at most
     // the attacker's Strength; the defense roll dodges if it's at most the defender's Agility,
     // except that a roll of 20 never dodges; the damage roll is against the weapon's maximum
-    // damage, reduced by the defender's Protection but never below 0.
-    private static StrikeResult Strike(int attackerStrength, Weapon attackerWeapon, int defenderAgility, int defenderProtection, Die die)
+    // damage, reduced by the defender's Protection but never below 0. The defender's Health
+    // Points stop at 0.
+    private static StrikeResult Strike(int attackerStrength, Weapon attackerWeapon, int defenderAgility, int defenderProtection, int defenderHealthPoints, Die die)
     {
         int attackRoll = die.Roll(20);
         if (attackRoll > attackerStrength)
-            return new StrikeResult(StrikeOutcome.Missed, 0, 0);
+            return new StrikeResult(StrikeOutcome.Missed, 0, 0, defenderHealthPoints);
 
         int defenseRoll = die.Roll(20);
         if (defenseRoll < 20 && defenseRoll <= defenderAgility)
-            return new StrikeResult(StrikeOutcome.Dodged, 0, 0);
+            return new StrikeResult(StrikeOutcome.Dodged, 0, 0, defenderHealthPoints);
 
         int damageRolled = die.Roll(attackerWeapon.MaxDamage);
         int damageTaken = Math.Max(0, damageRolled - defenderProtection);
-        return new StrikeResult(StrikeOutcome.Hit, damageRolled, damageTaken);
+        int healthPointsLeft = Math.Max(0, defenderHealthPoints - damageTaken);
+        return new StrikeResult(StrikeOutcome.Hit, damageRolled, damageTaken, healthPointsLeft);
     }
 
     private static string DescribeArmorAbsorption(Armor armor, int damageAbsorbed, int damageTaken, Messages messages)
