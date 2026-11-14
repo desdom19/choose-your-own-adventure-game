@@ -17,20 +17,20 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** done
+**Status:** ready-for-agent
 
-- [x] `FinalFight.Run` exists and returns Won, Lost or Retreated, and `Game` calls it for both the north and west paths.
-- [x] `Combat` is deleted, and so are `Game`'s encounter and end-game methods.
-- [x] No test calls a private method by reflection.
-- [x] No test builds the fight by hand from `Combat` and end-game calls. Those tests call `Run` instead, typing `a` at the encounter prompt where they used to start at the combat stats.
-- [x] The Dragon and Goblin full-text output tests and the Difficulty full-combat test pass with their expected strings unchanged, in all four languages.
-- [x] New tests through `Run` cover:
+- [ ] `FinalFight.Run` exists and returns Won, Lost or Retreated, and `Game` calls it for both the north and west paths.
+- [ ] `Combat` is deleted, and so are `Game`'s encounter and end-game methods.
+- [ ] No test calls a private method by reflection.
+- [ ] No test builds the fight by hand from `Combat` and end-game calls. Those tests call `Run` instead, typing `a` at the encounter prompt where they used to start at the combat stats.
+- [ ] The Dragon and Goblin full-text output tests and the Difficulty full-combat test pass with their expected strings unchanged, in all four languages.
+- [ ] New tests through `Run` cover:
   - Won;
   - Lost;
   - Retreated at the encounter prompt, with no dice rolled;
   - Retreated between Rounds;
   - an invalid answer at each prompt asks again.
-- [x] The end-game tests that only checked nothing throws are replaced by tests of each ending's exact text and its outcome.
-- [x] The tests that only checked `Combat`'s public fields or its retreat flag's default value are deleted.
-- [x] Input ending mid-fight still stops the game.
-- [x] All tests pass.
+- [ ] The end-game tests that only checked nothing throws are replaced by tests of each ending's exact text and its outcome.
+- [ ] The tests that only checked `Combat`'s public fields or its retreat flag's default value are deleted.
+- [ ] Input ending mid-fight still stops the game.
+- [ ] All tests pass.

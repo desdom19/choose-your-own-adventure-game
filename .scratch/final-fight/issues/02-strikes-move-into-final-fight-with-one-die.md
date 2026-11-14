@@ -14,18 +14,18 @@
 
 **Blocked by:** 01 (The Final Fight runs the encounter, the Rounds and the ending).
 
-**Status:** done
+**Status:** ready-for-agent
 
-- [x] The player and the Monster no longer have public attack, attack-roll, hit-check or damage-roll methods.
-- [x] The Monster no longer has public taunt-pick, reply-pick or stats-display methods.
-- [x] Every roll in a Final Fight comes from the `Die` passed to `Run`.
-- [x] Where a test already gave a single `ScriptedDie` to both sides, its roll list doesn't change.
-- [x] The direct attack tests are rewritten as short scripted Final Fights through `Run`, keeping their exact expected text. They cover:
+- [ ] The player and the Monster no longer have public attack, attack-roll, hit-check or damage-roll methods.
+- [ ] The Monster no longer has public taunt-pick, reply-pick or stats-display methods.
+- [ ] Every roll in a Final Fight comes from the `Die` passed to `Run`.
+- [ ] Where a test already gave a single `ScriptedDie` to both sides, its roll list doesn't change.
+- [ ] The direct attack tests are rewritten as short scripted Final Fights through `Run`, keeping their exact expected text. They cover:
   - hit, miss and dodge, for each side;
   - a defense roll of 20 getting through;
   - Armor absorption, for a partial hit and a whole hit;
   - each side being defeated.
-- [x] The two Difficulty tests that checked a Monster's attack roll directly become Final Fights through `Run`, and still show that Difficulty doesn't change the attack roll.
-- [x] The Dragon and Goblin full-text output tests and the Difficulty full-combat test pass with their expected strings unchanged, in all four languages.
-- [x] Character creation still rolls stats and Gold with the player's own `Die`, and its tests pass unchanged.
-- [x] All tests pass.
+- [ ] The two Difficulty tests that checked a Monster's attack roll directly become Final Fights through `Run`, and still show that Difficulty doesn't change the attack roll.
+- [ ] The Dragon and Goblin full-text output tests and the Difficulty full-combat test pass with their expected strings unchanged, in all four languages.
+- [ ] Character creation still rolls stats and Gold with the player's own `Die`, and its tests pass unchanged.
+- [ ] All tests pass.

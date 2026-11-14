@@ -7,10 +7,10 @@
 
 **Blocked by:** 03 (One Strike rule for both sides).
 
-**Status:** done
+**Status:** ready-for-agent
 
-- [x] After a Strike that deals more damage than the Monster has left, the Monster's Health Points are 0 and the "health points are now" line shows 0, in all four languages.
-- [x] The player's Health Points still stop at 0, as before.
-- [x] The one expected Dragon line "health points are now -2" becomes 0. No other expected text changes.
-- [x] A new test through `FinalFight.Run` shows a Monster's Health Points stopping at 0 for both the Dragon and the Goblin.
-- [x] All tests pass.
+- [ ] After a Strike that deals more damage than the Monster has left, the Monster's Health Points are 0 and the "health points are now" line shows 0, in all four languages.
+- [ ] The player's Health Points still stop at 0, as before.
+- [ ] The one expected Dragon line "health points are now -2" becomes 0. No other expected text changes.
+- [ ] A new test through `FinalFight.Run` shows a Monster's Health Points stopping at 0 for both the Dragon and the Goblin.
+- [ ] All tests pass.

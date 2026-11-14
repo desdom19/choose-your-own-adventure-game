@@ -20,9 +20,9 @@
 
 **Blocked by:** 02 (The Strikes move into the Final Fight, with one Die).
 
-**Status:** done
+**Status:** ready-for-agent
 
-- [x] Hitting, the dodge with the roll-of-20 rule, and damage minus Protection are each written once in the Final Fight and used by both sides.
-- [x] Each side's text, weapon-art handling and Armor absorption text are unchanged.
-- [x] The Dragon and Goblin full-text output tests, the Difficulty full-combat test and the Strike tests from ticket 02 all pass with their expected strings and roll lists unchanged, in all four languages. That includes the Dragon line "health points are now -2".
-- [x] All tests pass.
+- [ ] Hitting, the dodge with the roll-of-20 rule, and damage minus Protection are each written once in the Final Fight and used by both sides.
+- [ ] Each side's text, weapon-art handling and Armor absorption text are unchanged.
+- [ ] The Dragon and Goblin full-text output tests, the Difficulty full-combat test and the Strike tests from ticket 02 all pass with their expected strings and roll lists unchanged, in all four languages. That includes the Dragon line "health points are now -2".
+- [ ] All tests pass.

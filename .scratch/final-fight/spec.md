@@ -1,6 +1,6 @@
 # Spec: Make the Final Fight one module
 
-Status: done
+Status: ready-for-agent
 
 ## Problem Statement
 
